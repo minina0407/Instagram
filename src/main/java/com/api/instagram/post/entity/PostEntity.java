@@ -2,7 +2,8 @@ package com.api.instagram.post.entity;
 
 import com.api.instagram.image.entity.ImageEntity;
 import com.api.instagram.user.entity.UserEntity;
-import jakarta.persistence.*;
+
+import javax.persistence.*;
 
 @Entity(name = "POST")
 public class PostEntity {

@@ -1,9 +1,9 @@
 package com.api.instagram.user.entity;
 
 import com.api.instagram.image.entity.ImageEntity;
-import jakarta.persistence.*;
-import org.springframework.format.annotation.DateTimeFormat;
 
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity(name = "USER")

@@ -1,7 +1,8 @@
 package com.api.instagram.reply.entity;
 
 import com.api.instagram.comment.entity.CommentEntity;
-import jakarta.persistence.*;
+
+import javax.persistence.*;
 
 @Entity(name = "REPLY")
 public class ReplyEntity {

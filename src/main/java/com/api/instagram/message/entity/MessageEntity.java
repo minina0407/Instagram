@@ -1,7 +1,8 @@
 package com.api.instagram.message.entity;
 
 import com.api.instagram.user.entity.UserEntity;
-import jakarta.persistence.*;
+
+import javax.persistence.*;
 
 import java.time.LocalDateTime;
 
