@@ -1,9 +1,6 @@
 package com.api.instagram.message.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import javax.persistence.*;
 
 @Entity(name = "CHATROOM")
 public class ChatRoomEntity {
