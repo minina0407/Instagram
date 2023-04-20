@@ -1,23 +1,26 @@
 package com.api.instagram.user.entity;
 
-import com.api.instagram.image.entity.ImageEntity;
-
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-
-@Entity(name = "USER")
-public class UserEntity {
+@Entity
+@Table(name = "user")
+public class UserEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    @Column(name = "nickname")
-    private String nickname;
-    @ManyToOne
-    @JoinColumn(name = "image_id")
-    private ImageEntity imageId;
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-    @Column(name = "refresh_token")
-    private String refreshToken;
+    private Long id;
+
+    @Column(nullable = false)
+    private String username;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String name;
+
+    // constructors, getters, and setters
 }

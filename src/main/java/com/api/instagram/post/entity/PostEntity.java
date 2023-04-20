@@ -1,25 +1,44 @@
 package com.api.instagram.post.entity;
 
-import com.api.instagram.image.entity.ImageEntity;
 import com.api.instagram.user.entity.UserEntity;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.util.Date;
 
-@Entity(name = "POST")
-public class PostEntity {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "post")
+public class PostEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "content")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
+
+    @Column(nullable = false)
     private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private UserEntity userId;
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
 
-    @ManyToOne
-    @JoinColumn(name = "image_id")
-    private ImageEntity imageId;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreationTimestamp
+    private Date createdAt;
 
+    @Builder
+    public PostEntity(Long id, UserEntity user, String content, String imageUrl, Date createdAt) {
+        this.id = id;
+        this.user = user;
+        this.content = content;
+        this.imageUrl = imageUrl;
+        this.createdAt = createdAt;
+    }
+
+    // constructors, getters, and setters
 }
