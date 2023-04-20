@@ -1,31 +1,43 @@
 package com.api.instagram.comment.entity;
 
 import com.api.instagram.post.entity.PostEntity;
+import com.api.instagram.user.entity.UserEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import javax.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-@Entity(name = "COMMENT")
-@Getter
+import javax.persistence.*;
+import java.util.Date;
+
+
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CommentEntity {
+@Entity
+@Table(name = "comment")
+@Getter
+public class CommentEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "content")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private PostEntity post;
+
+    @Column(nullable = false)
     private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "post_id")
-    private PostEntity postId;
-    @Builder
-    public CommentEntity(Long id, String content, PostEntity postId) {
-        this.id = id;
-        this.content = content;
-        this.postId = postId;
-    }
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreationTimestamp
+    private Date createdAt;
 
+    // constructors, getters, and setters
 }
+

@@ -1,42 +1,46 @@
 package com.api.instagram.post.dto;
 
+import com.api.instagram.post.entity.PostEntity;
+import com.api.instagram.user.dto.User;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotBlank;
+import java.util.Date;
+import java.util.List;
+
 
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Post {
-    @NotBlank(message = "제목이 입력되지 않았습니다.")
-    private String title;
-    @NotBlank(message = "내용이 입력되지 않았습니다.")
+@NoArgsConstructor(access= AccessLevel.PROTECTED)
+public class Post{
+    private Long id;
+    private User user;
     private String content;
-    private MultipartFile image;
     private String imageUrl;
+    private Date createdAt;
 
     @Builder
-    public Post(String title,MultipartFile image, String content, String imageUrl) {
-        this.title = title;
-        this.image = image;
+    public Post(Long id, User user, String content, String imageUrl, Date createdAt) {
+        this.id = id;
+        this.user = user;
         this.content = content;
         this.imageUrl = imageUrl;
+        this.createdAt = createdAt;
     }
 
-    public Post toEntity() {
+    public static Post fromPostEntity(PostEntity postEntity) {
+        if (postEntity == null) {
+            return null;
+        }
         return Post.builder()
-                .title(title)
-                .content(content)
-                .imageUrl(imageUrl)
+                .id(postEntity.getId())
+                .content(postEntity.getContent())
+                .imageUrl(postEntity.getImageUrl())
                 .build();
     }
-
-    public void update(String content, String imageUrl) {
-        this.content = content;
-        this.imageUrl = imageUrl;
-    }
 }
+
+

@@ -3,57 +3,55 @@ package com.api.instagram.post.service;
 import com.api.instagram.exception.dto.BadRequestException;
 import com.api.instagram.exception.dto.ExceptionEnum;
 
-import com.api.instagram.image.ImageSerive;
+
 import com.api.instagram.post.PostRepository;
 import com.api.instagram.post.dto.Post;
+import com.api.instagram.post.entity.PostEntity;
+import com.api.instagram.user.dto.User;
+import com.api.instagram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.desktop.UserSessionEvent;
 import java.io.IOException;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.Collections;
+
+import static com.api.instagram.post.dto.Post.fromPostEntity;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final ImageSerive imageSerive;
-
+    private  final S3Service s3Service;
     @Transactional
-    public void savePost(Post postRequest) {
-        Post post = postRequest.toEntity();
-        postRepository.save(post);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Post> getPosts() {
-        return postRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public Post getPost(Long id) {
-        return postRepository.findById(id).orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "게시글을 찾을 수 없습니다."));
-    }
-
-    @Transactional
-    public Post updatePost(Long id,Post postRequest) throws IOException {
-        Post post = postRepository.findById(id).orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "게시글을 찾을 수 없습니다."));
-
+    public Post savePost(MultipartFile image, String content) throws IOException {
         String imageUrl = null;
-        if (postRequest.getImage() != null) {
-            imageUrl = imageSerive.saveFile(postRequest.getImage());
+        if (image != null) {
+            imageUrl = s3Service.upload(image);
         }
-        post.update(post.getContent(),imageUrl);
-        postRepository.save(post);
 
-        return post;}
+        PostEntity postEntity = PostEntity.builder()
+                .content(content)
+                .imageUrl(imageUrl)
+                .build();
 
-        @Transactional
-        public void deletePost (Long id){
-            postRepository.deleteById(id);
-        }
+        PostEntity savedPostEntity = postRepository.save(postEntity);
+
+        return Post.builder()
+                .id(savedPostEntity.getId())
+                .content(savedPostEntity.getContent())
+                .imageUrl(savedPostEntity.getImageUrl())
+                .build();
     }
-
+ @Transactional
+    public void deletePost(Long id) {
+        PostEntity postEntity = postRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+        postRepository.delete(postEntity);
+    }
+}
 
 
