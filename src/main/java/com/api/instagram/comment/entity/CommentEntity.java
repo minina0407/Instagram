@@ -38,6 +38,16 @@ public class CommentEntity{
     @CreationTimestamp
     private Date createdAt;
 
+
+
     // constructors, getters, and setters
+    @Builder
+    public CommentEntity(Long id, UserEntity user, PostEntity post, String content, Date createdAt) {
+        this.id = id;
+        this.user = user;
+        this.post = post;
+        this.content = content;
+        this.createdAt = createdAt;
+    }
 }
 
