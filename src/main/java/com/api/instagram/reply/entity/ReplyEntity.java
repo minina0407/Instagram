@@ -2,11 +2,18 @@ package com.api.instagram.reply.entity;
 
 import com.api.instagram.comment.entity.CommentEntity;
 import com.api.instagram.user.entity.UserEntity;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
 
-@Entity(name = "REPLY")
+@Entity
+@Table(name = "reply")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReplyEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +33,16 @@ public class ReplyEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+
+    @Builder
+    public ReplyEntity(Long id, UserEntity user, CommentEntity comment, String content, Date createdAt) {
+        this.id = id;
+        this.user = user;
+        this.comment = comment;
+        this.content = content;
+        this.createdAt = createdAt;
+    }
+    public void setContent(String content) {
+        this.content = content;
+    }
 }
