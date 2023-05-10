@@ -41,4 +41,7 @@ public class PostEntity{
     }
 
     // constructors, getters, and setters
+    public void setContent(String content) {
+        this.content = content;
+    }
 }
