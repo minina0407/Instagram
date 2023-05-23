@@ -20,7 +20,8 @@ public class PostEntity{
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @Column(nullable = false)
+
+    @Column(name = "content",nullable = false)
     private String content;
 
     @Column(name = "image_url", nullable = false)

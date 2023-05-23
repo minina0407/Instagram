@@ -7,19 +7,17 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
-public class User {
-    private Long id;
+public class Profile {
     private String nickname;
-    private String email;
-    private String name;
     private String profileImageUrl;
-    @Builder
-    public User(Long id, String nickname, String email, String name, String profileImageUrl) {
-        this.id = id;
-        this.nickname = nickname;
-        this.email = email;
-        this.name = name;
-        this.profileImageUrl = profileImageUrl;
-    }
+    private long followers;
+    private long following;
 
+    @Builder
+    public Profile(String nickname, String profileImageUrl, long followers, long following) {
+        this.nickname = nickname;
+        this.profileImageUrl = profileImageUrl;
+        this.followers = followers;
+        this.following = following;
+    }
 }
