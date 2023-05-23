@@ -32,6 +32,9 @@ public class UserEntity{
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
+    @Column(name = "role",nullable = false)
+    private String role;
+
     private long followers;
     private long following;
 
