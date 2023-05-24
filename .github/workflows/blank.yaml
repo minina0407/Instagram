@@ -10,10 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          repository: minina0407/PortfoGram
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
