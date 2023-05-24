@@ -1,36 +1,38 @@
-# This is a basic workflow to help you get started with Actions
+name: CI/CD
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  build-test-deploy:
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          repository: minina0407/PortfoGram
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - name: Run tests
+        run: ./gradlew test --no-daemon
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}  # 서버 호스트 주소
+          username: ${{ secrets.SERVER_USERNAME }}  # 서버 사용자 이름
+          key: ${{ secrets.SERVER_SSH_KEY }}  # 서버 SSH 키
+          port: ${{ secrets.SERVER_PORT }}  # SSH 포트
+          script: |
+            # 서버 배포 스크립트 실행
+            scp -r ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/path/to/deploy/
+            ssh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'java -jar /path/to/deploy/*.jar'
