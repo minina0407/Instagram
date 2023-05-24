@@ -24,6 +24,9 @@ jobs:
           architecture: x64
           check-latest: false
 
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew
+
       - name: Build with Gradle
         run: ./gradlew build --no-daemon
 
