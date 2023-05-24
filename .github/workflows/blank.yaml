@@ -10,20 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          repository: minina0407/PortfoGram
+
       - name: Setup Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: adopt
           java-package: jdk
           architecture: x64
           check-latest: false
-          server-id: github
-          server-username: GITHUB_ACTOR
-          server-password: GITHUB_TOKEN
-          overwrite-settings: true
-          job-status: success
-
 
       - name: Build with Gradle
         run: ./gradlew build --no-daemon
@@ -35,9 +34,9 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }} # 서버 호스트 주소
-          username: ${{ secrets.SERVER_USERNAME }}  # 서버 사용자 이름
-          key: ${{ secrets.SERVER_SSH_KEY }}  # 서버 SSH 키
-          port: ${{ secrets.SERVER_PORT }}  # SSH 포트
+          username: ${{ secrets.SERVER_USERNAME }} # 서버 사용자 이름
+          key: ${{ secrets.SERVER_SSH_KEY }} # 서버 SSH 키
+          port: ${{ secrets.SERVER_PORT }} # SSH 포트
           script: |
             # 서버 배포 스크립트 실행
             scp -r ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/path/to/deploy/
