@@ -23,24 +23,3 @@ jobs:
           java-package: jdk
           architecture: x64
           check-latest: false
-
-      - name: Grant execute permission to gradlew
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew build --no-daemon
-
-      - name: Run tests
-        run: ./gradlew test --no-daemon
-
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }} # 서버 호스트 주소
-          username: ${{ secrets.SERVER_USERNAME }} # 서버 사용자 이름
-          key: ${{ secrets.SERVER_SSH_KEY }} # 서버 SSH 키
-          port: ${{ secrets.SERVER_PORT }} # SSH 포트
-          script: |
-            # 서버 배포 스크립트 실행
-            scp -r ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/path/to/deploy/
-            ssh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'java -jar /path/to/deploy/*.jar'
