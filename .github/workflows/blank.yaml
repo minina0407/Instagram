@@ -67,4 +67,4 @@ jobs:
           port: 22
           passphrase: ${{ secrets.SERVER_PASSWORD }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+
