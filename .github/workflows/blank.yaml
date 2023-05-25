@@ -47,12 +47,19 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      
-      - name: bulid gradlew wrapper
-        run: sudo ./gradlew wrapper 
         
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradle
+      
+      - name: init with Gradle
+        uses: gradle/gradle-build-action@v2
+      - run: gradle init
+      
       - name: Build with Gradle
-        run: ./gradlew clean build
+        uses: gradle/gradle-build-action@v2
+        with:
+         gradle-version: 7.5.1
+         arguments: build
         
       - name: Deploy to Development
         run: |
