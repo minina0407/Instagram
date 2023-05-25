@@ -47,7 +47,10 @@ jobs:
 
       # gradle build
       - name: Build with Gradle
-        run: sudo ./gradlew build -x test
+        run: |
+          cd /home/runner/PortfoGram/PortfoGram  # 프로젝트 경로로 이동
+          sudo chmod +x gradlew  # gradlew 파일에 실행 권한 부여
+          sudo ./gradlew build -x test  # 빌드 실행
 
       - name: Deploy to Development
         run: |
