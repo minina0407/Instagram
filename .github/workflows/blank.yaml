@@ -33,44 +33,47 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+          
       # 환경별 properties 파일 생성(1) - application.properties
-      - name: make application.properties
+      - name: Make application.properties
         if: |
           contains(github.ref, 'main') 
         run: |
-          mkdir ./src/main/resources # resources 폴더 생성
-          cd ./src/main/resources # resources 폴더로 이동
-          touch ./application.properties # application.properties 생성
-          echo "${{ secrets.properties }}" > ./application.properties # github actions에서 설정한 값을 application.properties 파일에 쓰기
-        shell: bash
-
+          mkdir -p ./src/main/resources # resources 폴더 생성
+          touch ./src/main/resources/application.properties # application.properties 생성
+          echo "${{ secrets.properties }}" > ./src/main/resources/application.properties # github actions에서 설정한 값을 application.properties 파일에 쓰기
+          
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-version: 7.6.1
-          arguments: build
-          run: ./gradlew clean build --exclude-task test
+        run: ./gradlew clean build --exclude-task test
 
-       #depoly ec2           
+      # EC2로 파일 복사
+      - name: Generate unique filename
+        id: generate_filename
+        run: echo "::set-output name=filename::$(date +%s)"
+
       - name: Copy files to EC2 instance
+        run: |
+          mkdir -p /tmp/archive
+          cp target/*.jar /tmp/archive/
+          tar -czvf /tmp/${{ steps.generate_filename.outputs.filename }}.tar.gz -C /tmp/archive/ .
+
+      # EC2에 파일 전송
+      - name: Transfer files to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "target/*.jar"
-          target: "/home/ubuntu/app.jar"
+          source: /tmp/${{ steps.generate_filename.outputs.filename }}.tar.gz
+          target: /home/ubuntu/${{ steps.generate_filename.outputs.filename }}.tar.gz
 
+      # EC2에서 압축 해제
+      - name: Extract files on EC2
+        run: ssh -i ${{ secrets.SERVER_SSH_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'tar -xzvf /home/ubuntu/${{ steps.generate_filename.outputs.filename }}.tar.gz -C /home/ubuntu/'
+
+      # EC2에서 애플리케이션 실행
       - name: Start application on EC2 instance
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd /home/ubuntu
-            nohup java -jar app.jar > /dev/null 2>&1 &
-
+        run: ssh -i ${{ secrets.SERVER_SSH_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'nohup java -jar /home/ubuntu/app.jar > /dev/null 2>&1 &'
