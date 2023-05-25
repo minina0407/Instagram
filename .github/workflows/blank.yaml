@@ -53,32 +53,28 @@ jobs:
           gradle-version: 7.6.1
           arguments: build
           run: ./gradlew clean build --exclude-task test
+          
+      - name: Create archive directory
+        run: mkdir -p /tmp/archive
 
-   # EC2로 파일 복사
-      - name: Generate unique filename
-        id: generate_filename
-        run: echo "::set-output name=filename::$(date +%s)"
+      - name: Copy JAR files to archive directory
+        run: cp target/*.jar /tmp/archive/
 
+      - name: Create tar.gz archive
+        run: tar -czvf /tmp/$(date +%s).tar.gz -C /tmp/archive/ .
+
+      # Deploy to EC2
       - name: Copy files to EC2 instance
-        run: |
-          mkdir -p /tmp/archive
-          cp target/*.jar /tmp/archive/
-          tar -czvf /tmp/${{ steps.generate_filename.outputs.filename }}.tar.gz -C /tmp/archive/ .
-
-      # EC2에 파일 전송
-      - name: Transfer files to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: /tmp/${{ steps.generate_filename.outputs.filename }}.tar.gz
-          target: /home/ubuntu/${{ steps.generate_filename.outputs.filename }}.tar.gz
+          source: "/tmp/*.tar.gz"
+          target: "/home/ubuntu/app.tar.gz"
 
-      # EC2에서 압축 해제
-      - name: Extract files on EC2
-        run: ssh -i ${{ secrets.SERVER_SSH_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'tar -xzvf /home/ubuntu/${{ steps.generate_filename.outputs.filename }}.tar.gz -C /home/ubuntu/'
+      - name: Extract archive on EC2 instance
+        run: ssh -i ${{ secrets.SERVER_SSH_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'tar -xzvf /home/ubuntu/app.tar.gz -C /home/ubuntu/'
 
-      # EC2에서 애플리케이션 실행
       - name: Start application on EC2 instance
         run: ssh -i ${{ secrets.SERVER_SSH_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'nohup java -jar /home/ubuntu/app.jar > /dev/null 2>&1 &'
