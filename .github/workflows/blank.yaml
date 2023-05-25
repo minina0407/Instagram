@@ -53,12 +53,12 @@ jobs:
           gradle-version: 7.6.1
           arguments: build
           run: ./gradlew clean build --exclude-task test
-          
+     
       - name: Create archive directory
         run: mkdir -p /tmp/archive
 
       - name: Copy JAR files to archive directory
-        run: cp target/*.jar /tmp/archive/
+        run: cp ./build/libs/*.jar /tmp/archive/
 
       - name: Create tar.gz archive
         run: tar -czvf /tmp/$(date +%s).tar.gz -C /tmp/archive/ .
