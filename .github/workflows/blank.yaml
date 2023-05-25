@@ -23,13 +23,13 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          cd PortfoGram/PortfoGram
+          cd /home/runner/PortfoGram/PortfoGram
           chmod +x gradlew
           ./gradlew build --no-daemon
 
       - name: Run tests
         run: |
-          cd PortfoGram/PortfoGram
+          cd /home/runner/PortfoGram/PortfoGram
           ./gradlew test --no-daemon
 
       - name: Deploy to server
@@ -41,5 +41,5 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}  # SSH 포트
           script: |
             # 서버 배포 스크립트 실행
-            scp -r PortfoGram/PortfoGram/build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/path/to/deploy/
+            scp -r /home/runner/PortfoGram/PortfoGram/build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/path/to/deploy/
             ssh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'java -jar /path/to/deploy/*.jar'
