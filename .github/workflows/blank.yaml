@@ -27,7 +27,6 @@ jobs:
 
       - name: Build with Gradle
         run: cd /home/runner/PortfoGram/PortfoGram
-              ./gradlew build --no-daemon
 
       - name: Run tests
         run: ./gradlew test --no-daemon
