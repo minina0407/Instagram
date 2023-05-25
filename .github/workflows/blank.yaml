@@ -33,23 +33,28 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-          
       # 환경별 properties 파일 생성(1) - application.properties
-      - name: Make application.properties
+      - name: make application.properties
         if: |
           contains(github.ref, 'main') 
         run: |
-          mkdir -p ./src/main/resources # resources 폴더 생성
-          touch ./src/main/resources/application.properties # application.properties 생성
-          echo "${{ secrets.properties }}" > ./src/main/resources/application.properties # github actions에서 설정한 값을 application.properties 파일에 쓰기
-          
+          mkdir ./src/main/resources # resources 폴더 생성
+          cd ./src/main/resources # resources 폴더로 이동
+          touch ./application.properties # application.properties 생성
+          echo "${{ secrets.properties }}" > ./application.properties # github actions에서 설정한 값을 application.properties 파일에 쓰기
+        shell: bash
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       
       - name: Build with Gradle
-        run: ./gradlew clean build --exclude-task test
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: 7.6.1
+          arguments: build
+          run: ./gradlew clean build --exclude-task test
 
-      # EC2로 파일 복사
+   # EC2로 파일 복사
       - name: Generate unique filename
         id: generate_filename
         run: echo "::set-output name=filename::$(date +%s)"
