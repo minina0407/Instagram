@@ -1,45 +1,70 @@
-name: CI/CD
+# github repository actions 페이지에 나타날 이름
+name: CI/CD using github actions & docker
 
+# event trigger
+# main이나 develop 브랜치에 push가 되었을 때 실행
 on:
   push:
-    branches:
-      - main
+    branches: [ "main", "develop" ]
+
+permissions:
+  contents: read
 
 jobs:
-  build-test-deploy:
+  CI-CD:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
-      - name: Setup Java
-        uses: actions/setup-java@v2
+      # JDK setting - github actions에서 사용할 JDK 설정 (프로젝트나 AWS의 java 버전과 달라도 무방)
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          java-version: 17
-          distribution: adopt
-          java-package: jdk
-          architecture: x64
+          java-version: '17'
+          distribution: 'adopt'
 
+      # gradle caching - 빌드 시간 향상
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # 환경별 properties 파일 생성(1) - application.properties
+      - name: make application.properties
+        if: |
+          contains(github.ref, 'main') 
+        run: |
+          mkdir ./src/main/resources # resources 폴더 생성
+          cd ./src/main/resources # resources 폴더로 이동
+          touch ./application.properties # application.properties 생성
+          echo "${{ secrets.properties }}" > ./application.properties # github actions에서 설정한 값을 application.properties 파일에 쓰기
+        shell: bash
+
+      # gradle build
       - name: Build with Gradle
-        run: |
-          cd /home/runner/PortfoGram/PortfoGram
-          sudo chmod +x gradlew
-          sudo ./gradlew build --no-daemon
+        run: ./gradlew build -x test
 
-      - name: Run tests
+      - name: Deploy to Development
         run: |
-          cd /home/runner/PortfoGram/PortfoGram
-          sudo ./gradlew test --no-daemon
+          # 프로젝트 전송
+          scp -i ${{ secrets.SERVER_PRIVATE_KEY }} -r ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:${{ secrets.EC2_PROJECT_PATH }}
 
-      - name: Deploy to server
+          # EC2에서 명령어 실행
+          ssh -i ${{ secrets.SERVER_PRIVATE_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'java -jar ${secrets.EC2_PROJECT_PATH}/*.jar'
+          
+      ## deploy to develop
+      - name: Deploy to dev
         uses: appleboy/ssh-action@master
+        id: deploy-dev
+        if: contains(github.ref, 'main')
         with:
-          host: ${{ secrets.SERVER_HOST }}  # 서버 호스트 주소
-          username: ${{ secrets.SERVER_USERNAME }}  # 서버 사용자 이름
-          key: ${{ secrets.SERVER_SSH_KEY }}  # 서버 SSH 키
-          port: ${{ secrets.SERVER_PORT }}  # SSH 포트
-          script: |
-            # 서버 배포 스크립트 실행
-            scp -r /home/runner/PortfoGram/PortfoGram/build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/path/to/deploy/
-            ssh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'java -jar /path/to/deploy/*.jar'
+          host: ${{ secrets.SERVER_HOST }} # EC2 퍼블릭 IPv4 DNS
+          username: ${{ secrets.SERVER_USERNAME }} # ubuntu
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: 22
+          key: ${{ secrets.SERVER_PRIVATE_KEY }}
