@@ -54,14 +54,7 @@ jobs:
           arguments: build
           run: ./gradlew clean build --exclude-task test
 
-        
-      - name: Deploy to Development
-        run: |
-          # 프로젝트 전송
-          sudo scp -i ${{ secrets.SERVER_SSH_KEY}} -r ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:${{ secrets.EC2_PROJECT_PATH }}
-          # EC2에서 명령어 실행
-          sudo ssh -i ${{ secrets.SERVER_SSH_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'java -jar ${secrets.EC2_PROJECT_PATH}/*.jar'
-          
+                  
       ## deploy to develop
       - name: Deploy to dev
         uses: appleboy/ssh-action@master
