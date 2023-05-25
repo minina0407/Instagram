@@ -47,15 +47,15 @@ jobs:
 
       # gradle build
       - name: Build with Gradle
-        run: ./gradlew build -x test
+        run: sudo ./gradlew build -x test
 
       - name: Deploy to Development
         run: |
           # 프로젝트 전송
-          scp -i ${{ secrets.SERVER_PRIVATE_KEY }} -r ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:${{ secrets.EC2_PROJECT_PATH }}
+          sudo scp -i ${{ secrets.SERVER_PRIVATE_KEY }} -r ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:${{ secrets.EC2_PROJECT_PATH }}
 
           # EC2에서 명령어 실행
-          ssh -i ${{ secrets.SERVER_PRIVATE_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'java -jar ${secrets.EC2_PROJECT_PATH}/*.jar'
+          sudo ssh -i ${{ secrets.SERVER_PRIVATE_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'java -jar ${secrets.EC2_PROJECT_PATH}/*.jar'
           
       ## deploy to develop
       - name: Deploy to dev
