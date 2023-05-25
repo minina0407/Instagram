@@ -24,13 +24,13 @@ jobs:
       - name: Build with Gradle
         run: |
           cd /home/runner/PortfoGram/PortfoGram
-          chmod +x gradlew
-          ./gradlew build --no-daemon
+          sudo chmod +x gradlew
+          sudo ./gradlew build --no-daemon
 
       - name: Run tests
         run: |
           cd /home/runner/PortfoGram/PortfoGram
-          ./gradlew test --no-daemon
+          sudo ./gradlew test --no-daemon
 
       - name: Deploy to server
         uses: appleboy/ssh-action@master
