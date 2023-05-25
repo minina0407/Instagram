@@ -5,7 +5,7 @@ name: CI/CD using github actions
 # main이나 develop 브랜치에 push가 되었을 때 실행
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main" ]
 
 permissions:
   contents: read
@@ -59,7 +59,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
          gradle-version: 7.6.1
-         arguments: build
+         arguments: build --stacktrace
         
       - name: Deploy to Development
         run: |
