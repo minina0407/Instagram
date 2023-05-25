@@ -33,7 +33,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-
       # 환경별 properties 파일 생성(1) - application.properties
       - name: make application.properties
         if: |
@@ -47,27 +46,19 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-        
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradle
-      
-      - name: init with Gradle
-        uses: gradle/gradle-build-action@v2
-      - run: gradle init
       
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: 7.6.1
           arguments: build
-          run: ./gradle clean build --exclude-task test
+          run: ./gradlew clean build --exclude-task test
 
         
       - name: Deploy to Development
         run: |
           # 프로젝트 전송
           sudo scp -i ${{ secrets.SERVER_PRIVATE_KEY }} -r ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:${{ secrets.EC2_PROJECT_PATH }}
-
           # EC2에서 명령어 실행
           sudo ssh -i ${{ secrets.SERVER_PRIVATE_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'java -jar ${secrets.EC2_PROJECT_PATH}/*.jar'
           
