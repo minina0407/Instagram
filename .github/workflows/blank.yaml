@@ -31,10 +31,13 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Create deployment directory
+        run: mkdir -p /home/runner/PortfoGram/PortfoGram
+
       - name: Initialize Gradle Wrapper
         run: |
-              cd /home/runner/PortfoGram/PortfoGram
-              ./gradlew wrapper --gradle-version 7.6.1
+          cd /home/runner/PortfoGram/PortfoGram
+          ./gradlew wrapper --gradle-version 7.6.1
 
       - name: Create application.properties for main branch
         if: contains(github.ref, 'main')
@@ -45,7 +48,6 @@ jobs:
         run: |
           cd /home/runner/PortfoGram/PortfoGram
           ./gradlew clean build --exclude-task test
-
       - name: Copy JAR file to EC2 instance
         uses: appleboy/scp-action@master
         with:
@@ -66,7 +68,6 @@ jobs:
           script: |
             mkdir -p /home/runner/PortfoGram/PortfoGram
             cp /home/ubuntu/app.jar /home/runner/PortfoGram/PortfoGram/app.jar
-
             # 서버 시작
             cd /home/runner/PortfoGram/PortfoGram
-            java
+            java -jar -Dspring.config.location=./application.properties -Duser.timezone=Asia/Seoul app.jar &
