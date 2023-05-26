@@ -31,12 +31,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
     
-      # Initialize Gradle Wrapper and fetch necessary files
-      - name: Initialize Gradle Wrapper
-        run: |
-          chmod +x gradlew
-          ./gradlew wrapper --gradle-version 7.6.1
-          ./gradlew --version
+
 
       # Create properties file for the main branch - application.properties
       - name: Create application.properties
@@ -52,6 +47,13 @@ jobs:
       # Build with Gradle
       - name: Build with Gradle
         run: ./gradlew clean build --exclude-task test
+        
+      # Initialize Gradle Wrapper and fetch necessary files
+      - name: Initialize Gradle Wrapper
+        run: |
+          chmod +x gradlew
+          ./gradlew wrapper --gradle-version 7.6.1
+          ./gradlew --version
 
       # Copy JAR file to EC2 instance
       - name: Copy JAR file to EC2 instance
