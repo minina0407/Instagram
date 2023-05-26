@@ -30,12 +30,16 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
+    
+    
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
       # Initialize Gradle Wrapper and fetch necessary files
       - name: Initialize Gradle Wrapper
         run: |
-          ./gradlew wrapper --gradle-version 7.6.1
-          ./gradlew --version
+          sudo ./gradlew wrapper --gradle-version 7.6.1
+          sudo ./gradlew --version
 
       # Create properties file for the main branch - application.properties
       - name: Create application.properties
