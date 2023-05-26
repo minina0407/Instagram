@@ -32,16 +32,19 @@ jobs:
         run: chmod +x gradlew
 
       - name: Initialize Gradle Wrapper
-        run: ./gradlew wrapper --gradle-version 7.6.1
+        run: |
+              cd /home/runner/PortfoGram/PortfoGram
+              ./gradlew wrapper --gradle-version 7.6.1
 
       - name: Create application.properties for main branch
         if: contains(github.ref, 'main')
         run: |
           mkdir -p src/main/resources
           echo "${{ secrets.properties }}" > src/main/resources/application.properties
-
       - name: Build with Gradle
-        run: ./gradlew clean build --exclude-task test
+        run: |
+          cd /home/runner/PortfoGram/PortfoGram
+          ./gradlew clean build --exclude-task test
 
       - name: Copy JAR file to EC2 instance
         uses: appleboy/scp-action@master
@@ -50,7 +53,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSWORD }}
-          source: "build/libs/*.jar"
+          source: "/home/runner/PortfoGram/PortfoGram/build/libs/*.jar"
           target: "/home/ubuntu/app.jar"
 
       - name: SSH into EC2 instance and deploy
@@ -61,5 +64,9 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            cd /home/ubuntu
-            java -jar -Dspring.config.location=./application.properties -Duser.timezone=Asia/Seoul app.jar &
+            mkdir -p /home/runner/PortfoGram/PortfoGram
+            cp /home/ubuntu/app.jar /home/runner/PortfoGram/PortfoGram/app.jar
+
+            # 서버 시작
+            cd /home/runner/PortfoGram/PortfoGram
+            java
