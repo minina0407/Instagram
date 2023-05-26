@@ -60,6 +60,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_PASSWORD }}
           source: "build/libs/*.jar"
           target: "/home/ubuntu/app.jar"
 
@@ -69,6 +70,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_PASSWORD }}
           script: |
             cd /home/ubuntu
             java -jar -Dspring.config.location=./application.properties -Duser.timezone=Asia/Seoul app.jar &
