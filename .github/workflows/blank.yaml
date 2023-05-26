@@ -53,28 +53,22 @@ jobs:
           gradle-version: 7.6.1
           arguments: build
           run: ./gradlew clean build --exclude-task test
-     
-      - name: Create archive directory
-        run: mkdir -p /tmp/archive
-
-      - name: Copy JAR files to archive directory
-        run: cp ./build/libs/*.jar /tmp/archive/
-
-      - name: Create tar.gz archive
-        run: tar -czvf /tmp/$(date +%s).tar.gz -C /tmp/archive/ .
-
-      # Deploy to EC2
-      - name: Copy files to EC2 instance
+          
+      - name: Copy JAR file to EC2 instance
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "/tmp/*.tar.gz"
-          target: "/home/ubuntu/app.tar.gz"
+          source: "build/libs/*.jar"
+          target: "/home/ubuntu/app.jar"
 
-      - name: Extract archive on EC2 instance
-        run: ssh -i ${{ secrets.SERVER_SSH_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'tar -xzvf /home/ubuntu/app.tar.gz -C /home/ubuntu/'
-
-      - name: Start application on EC2 instance
-        run: ssh -i ${{ secrets.SERVER_SSH_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'nohup java -jar /home/ubuntu/app.jar > /dev/null 2>&1 &'
+      - name: SSH into EC2 instance and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            java -jar -Dspring.config.location=./application.properties -Duser.timezone=Asia/Seoul app.jar &
