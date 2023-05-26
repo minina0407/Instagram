@@ -33,13 +33,13 @@ jobs:
     
     
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+        run: chmod +x gradle
 
       # Initialize Gradle Wrapper and fetch necessary files
       - name: Initialize Gradle Wrapper
         run: |
-          sudo ./gradlew wrapper --gradle-version 7.6.1
-          sudo ./gradlew --version
+          sudo ./gradle wrapper --gradle-version 7.6.1
+          sudo ./gradle --version
 
       # Create properties file for the main branch - application.properties
       - name: Create application.properties
