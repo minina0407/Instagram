@@ -76,4 +76,4 @@ jobs:
   
        # 배포 그룹으로 애플리케이션 전송
       - name: Code Deploy
-        run: aws deploy create-deployment --application-name Aws-CICD --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name Aws-CICD-group --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME.zip
+        run: aws deploy create-deployment --application-name Aws-CICD --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name Aws-CICD-group --s3-location bucket=Aws-CICD,bundleType=zip,key=practice-deploy.zip
