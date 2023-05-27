@@ -33,6 +33,7 @@ jobs:
 
       - name: Create deployment directory
         run: mkdir -p /home/runner/PortfoGram/PortfoGram
+        
       - name: Set up Gradle
         run: |
           wget https://services.gradle.org/distributions/gradle-7.6.1-bin.zip
@@ -40,13 +41,22 @@ jobs:
           echo "export PATH=\$PATH:$HOME/gradle/gradle-7.6.1/bin" >> $HOME/.bashrc
       - name: Initialize Gradle Wrapper
         run: |
+           cd /home/runner/PortfoGram/PortfoGram
+           chmod +x ./gradlew
+            ./gradlew wrapper --gradle-version 7.6.1
+            rm -rf ~/.gradle/wrapper/dists/gradle-8.1.1-all
+        shell: bash
+        env:
+          JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.7-7/x64
+
+      - name: Use Gradle Wrapper
+        run: |
           cd /home/runner/PortfoGram/PortfoGram
-          chmod +x ./gradle/wrapper/gradlew
-          ./gradle/wrapper/gradlew wrapper --gradle-version 7.6.1
-          rm -rf ~/.gradle/wrapper/dists/gradle-8.1.1-all
+          ./gradlew clean build
         shell: bash
         env:
          JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.7-7/x64
+
 
 
 
