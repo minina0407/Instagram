@@ -59,4 +59,21 @@ jobs:
         shell: bash
         env:
           JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.7-7/x64
+          
+      - name: Make zip file
+        run: zip -r ./practice-deploy.zip .
+        shell: bash
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ap-northeast-2
+
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./practice-deploy.zip s3://privatesns/practice-deploy.zip
+  
+       # 배포 그룹으로 애플리케이션 전송
+      - name: Code Deploy
+        run: aws deploy create-deployment --application-name Aws-CICD --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name Aws-CICD-group --s3-location bucket=Aws-CICD,bundleType=zip,key=practice-deploy.zip
