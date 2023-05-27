@@ -45,6 +45,11 @@ jobs:
           mkdir -p src/main/resources
           echo "${{ secrets.properties }}" > src/main/resources/application.properties
 
+      - name: Initialize Gradle build
+        run: |
+          cd /home/runner/PortfoGram/PortfoGram
+          gradle init --type java-application
+
       - name: Build with Gradle
         run: |
           cd /home/runner/PortfoGram/PortfoGram
@@ -59,4 +64,7 @@ jobs:
           passphrase: ${{ secrets.SERVER_PASSWORD }}
           script: |
             mkdir -p /home/runner/PortfoGram/PortfoGram
-            cp /home/ubuntu/app.jar /home/runner/PortfoGram/Portfo
+            cp /home/ubuntu/app.jar /home/runner/PortfoGram/PortfoGram/app.jar
+            # 서버 시작
+            cd /home/runner/PortfoGram/PortfoGram
+            java -jar -Dspring.config.location=./application.properties -Duser.timezone=Asia/Seoul app.jar &
