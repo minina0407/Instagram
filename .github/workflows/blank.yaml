@@ -73,3 +73,7 @@ jobs:
 
       - name: Upload to S3
         run: aws s3 cp --region ap-northeast-2 ./practice-deploy.zip s3://privatesns/practice-deploy.zip
+  
+       # 배포 그룹으로 애플리케이션 전송
+      - name: Code Deploy
+        run: aws deploy create-deployment --application-name Aws-CICD --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name Aws-CICD-group --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME.zip
