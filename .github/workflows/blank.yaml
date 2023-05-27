@@ -77,4 +77,4 @@ jobs:
         run: aws deploy create-deployment --application-name CICID
           --deployment-config-name CodeDeployDefault.OneAtATime
           --deployment-group-name CICD
-          --s3-location bucket=privatesns,bundleType=zip,key=$GITHUB_SHA.zip
+
