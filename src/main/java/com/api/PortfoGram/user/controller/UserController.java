@@ -19,7 +19,6 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<Profile> getProfile(@RequestParam("user_id") Long userId) {
         Profile profile = userService.searchProfileById(userId);
-
         return ResponseEntity.ok(profile);
     }
     @PostMapping("/join")
