@@ -1,75 +1,25 @@
-# github repository actions 페이지에 나타날 이름
-name: CI/CD using github actions
+name: Deploy to AWS CodeDeploy
 
-# event trigger
-# main이나 develop 브랜치에 push가 되었을 때 실행
 on:
   push:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
+    branches:
+      - main
 
 jobs:
-  CI-CD:
+  deploy:
     runs-on: ubuntu-latest
-    steps:
 
-      # JDK setting - github actions에서 사용할 JDK 설정 (프로젝트나 AWS의 java 버전과 달라도 무방)
-      - uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'adopt'
 
-      # gradle caching - 빌드 시간 향상
-      - name: Gradle Caching
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      # 환경별 properties 파일 생성(1) - application.properties
-      - name: make application.properties
-        if: |
-          contains(github.ref, 'main') 
-        run: |
-          mkdir ./src/main/resources # resources 폴더 생성
-          cd ./src/main/resources # resources 폴더로 이동
-          touch ./application.properties # application.properties 생성
-          echo "${{ secrets.properties }}" > ./application.properties # github actions에서 설정한 값을 application.properties 파일에 쓰기
-        shell: bash
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-version: 7.6.1
-          arguments: build
-          run: ./gradlew clean build --exclude-task test
+        run: ./gradlew clean build --exclude-task test
 
-        
-      - name: Deploy to Development
-        run: |
-          # 프로젝트 전송
-          sudo scp -i ${{ secrets.SERVER_PRIVATE_KEY }} -r ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:${{ secrets.EC2_PROJECT_PATH }}
-          # EC2에서 명령어 실행
-          sudo ssh -i ${{ secrets.SERVER_PRIVATE_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} 'java -jar ${secrets.EC2_PROJECT_PATH}/*.jar'
-          
-      ## deploy to develop
-      - name: Deploy to dev
-        uses: appleboy/ssh-action@master
-        id: deploy-dev
-        if: contains(github.ref, 'main')
-        with:
-          host: ${{ secrets.SERVER_HOST }} # EC2 퍼블릭 IPv4 DNS
-          username: ${{ secrets.SERVER_USERNAME }} # ubuntu
-          password: ${{ secrets.SERVER_PASSWORD }}
-          port: 22
-          key: ${{ secrets.SERVER_PRIVATE_KEY }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws
