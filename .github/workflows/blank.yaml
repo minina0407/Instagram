@@ -35,8 +35,8 @@ jobs:
 
       - name: Initialize Gradle Wrapper
         run: |
-          cd /home/runner/PortfoGram/PortfoGram
-          gradle wrapper --gradle-version 7.6.1
+            cd /home/runner/PortfoGram/PortfoGram
+            gradle wrapper --gradle-version 7.6.1 init --type java-application
 
       - name: Create application.properties for main branch
         if: contains(github.ref, 'main')
