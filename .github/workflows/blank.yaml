@@ -36,36 +36,28 @@ jobs:
         
       - name: Set up Gradle
         run: |
+          cd /home/runner/PortfoGram/PortfoGram
           wget https://services.gradle.org/distributions/gradle-7.6.1-bin.zip
           unzip -d $HOME/gradle gradle-7.6.1-bin.zip
           echo "export PATH=\$PATH:$HOME/gradle/gradle-7.6.1/bin" >> $HOME/.bashrc
-      - name: Initialize Gradle Wrapper
-        run: |
-           cd /home/runner/PortfoGram/PortfoGram
-           chmod +x ./gradlew
-            ./gradlew wrapper --gradle-version 7.6.1
-            rm -rf ~/.gradle/wrapper/dists/gradle-8.1.1-all
-        shell: bash
-        env:
-          JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.7-7/x64
-
-      - name: Use Gradle Wrapper
-        run: |
-          cd /home/runner/PortfoGram/PortfoGram
-          ./gradlew clean build
-        shell: bash
-        env:
-         JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.7-7/x64
-
-
-
-
+      
       - name: Create application.properties for main branch
         if: contains(github.ref, 'main')
         run: |
           cd /home/runner/PortfoGram/PortfoGram
           mkdir -p src/main/resources
           echo "${{ secrets.properties }}" > src/main/resources/application.properties
+
+      - name: Build with Gradle
+        run: |
+          cd /home/runner/PortfoGram/PortfoGram
+          $HOME/gradle/gradle-7.6.1/bin/gradle clean build
+        shell: bash
+        env:
+          JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.7-7/x64
+
+
+
 
       - name: Build with Gradle
         run: |
