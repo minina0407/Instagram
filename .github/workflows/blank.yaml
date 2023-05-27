@@ -47,6 +47,12 @@ jobs:
           cd /home/runner/PortfoGram/PortfoGram
           mkdir -p src/main/resources
           echo "${{ secrets.properties }}" > src/main/resources/application.properties
+      
+      - name: Initialize Gradle Wrapper
+        run: |
+          cd /home/runner/PortfoGram/PortfoGram
+          echo "include ':app'" > settings.gradle
+        shell: bash
 
       - name: Build with Gradle
         run: |
@@ -56,17 +62,6 @@ jobs:
         env:
           JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.7-7/x64
 
-
-
-
-      - name: Build with Gradle
-        run: |
-          cd /home/runner/PortfoGram/PortfoGram
-          gradle wrapper --gradle-version 7.6.1
-          ./gradlew clean build
-        shell: bash
-        env:
-          JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.7-7/x64
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
