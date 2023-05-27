@@ -68,6 +68,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ec2-user
           key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_PASSWORD }}
           envs: GITHUB_SHA
 
 
