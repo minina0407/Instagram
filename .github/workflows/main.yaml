@@ -43,7 +43,7 @@ jobs:
           cd /home/runner/PortfoGram/PortfoGram
           mkdir -p src/main/resources
           touch src/main/resources/application.properties
-          echo "${{ secrets.PROPERTIES }}" > src/main/resources/application.properties
+          echo "${{secrets.APPLICATION}}" > src/main/resources/application.properties
           cat src/main/resources/application.properties
 
       
