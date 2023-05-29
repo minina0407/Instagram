@@ -3,9 +3,9 @@ os: linux
 
 files:
   - source: /
-    destination: /opt/testapp
+    destination: /home/runner/PortfoGram/PortfoGram
 permissions:
-  - object: /opt/testapp/
+  - object: /home/runner/PortfoGram/PortfoGram
     owner: ubuntu
     group: ubuntu
     mode: 755
