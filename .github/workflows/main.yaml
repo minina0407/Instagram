@@ -39,10 +39,11 @@ jobs:
           echo "export PATH=\$PATH:$HOME/gradle/gradle-7.6.1/bin" >> $HOME/.bashrc
           
       - name: application
-      - uses: actions/checkout@v3
-      - run: touch ./src/main/resources/application.properties
-      - run: echo "${{ secrets.PROPERTIES}}" > ./src/main/resources/application.properties
-      - run: cat ./src/main/resources/application.properties
+        run: |
+          touch ./src/main/resources/application.properties
+          echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.properties
+          cat ./src/main/resources/application.properties
+
       
       - name: Initialize Gradle Wrapper
         run: |
