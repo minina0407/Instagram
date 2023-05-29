@@ -37,13 +37,12 @@ jobs:
           wget https://services.gradle.org/distributions/gradle-7.6.1-bin.zip
           unzip -d $HOME/gradle gradle-7.6.1-bin.zip
           echo "export PATH=\$PATH:$HOME/gradle/gradle-7.6.1/bin" >> $HOME/.bashrc
-      
-      - name: Create application.properties for main branch
-        if: contains(github.ref, 'main')
-        run: |
-          cd /home/runner/PortfoGram/PortfoGram
-          mkdir -p src/main/resources
-          echo "${{ secrets.PROPERTIES}}" > src/main/resources/application.properties
+          
+      - name: application
+      - uses: actions/checkout@v3
+      - run: touch ./src/main/resources/application.properties
+      - run: echo "${{ secrets.PROPERTIES}}" > ./src/main/resources/application.properties
+      - run: cat ./src/main/resources/application.properties
       
       - name: Initialize Gradle Wrapper
         run: |
