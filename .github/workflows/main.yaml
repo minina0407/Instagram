@@ -38,14 +38,6 @@ jobs:
           unzip -d $HOME/gradle gradle-7.6.1-bin.zip
           echo "export PATH=\$PATH:$HOME/gradle/gradle-7.6.1/bin" >> $HOME/.bashrc
           
-      - name: application
-        run: |
-          cd /home/runner/PortfoGram/PortfoGram
-          mkdir -p src/main/resources
-          touch src/main/resources/application.properties
-          echo "${{secrets.APPLICATION}}" > src/main/resources/application.properties
-          cat src/main/resources/application.properties
-
       
       - name: Initialize Gradle Wrapper
         run: |
