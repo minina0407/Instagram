@@ -4,15 +4,17 @@ import com.api.PortfoGram.user.dto.Profile;
 import com.api.PortfoGram.user.dto.User;
 import com.api.PortfoGram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user")
+@RequestMapping("/api/v1/user")
 public class UserController {
 
     private final UserService userService;
@@ -21,13 +23,11 @@ public class UserController {
         Profile profile = userService.searchProfileById(userId);
         return ResponseEntity.ok(profile);
     }
-    @PostMapping("/join")
-    public ResponseEntity<User> joinMembership(@RequestParam("nickname") String nickname, @RequestParam("profile_image") MultipartFile profileImage) throws IOException {
-        User user = userService.createUser(nickname,profileImage);
-
-        return ResponseEntity.ok(user);
+    @PostMapping
+    public ResponseEntity<User> signUp(@Valid @RequestBody User user) {
+        userService.saveUser(user);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
-
     @DeleteMapping("/withdrawal")
     public ResponseEntity<Void> withdrawMembership(@RequestParam("id") Long userId) {
         // Delete the member based on the provided ID
