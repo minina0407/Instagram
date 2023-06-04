@@ -1,5 +1,6 @@
 package com.api.PortfoGram.user.dto;
 
+import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,14 +13,22 @@ public class User {
     private String nickname;
     private String email;
     private String name;
-    private String profileImageUrl;
+    private String password;
+
     @Builder
-    public User(Long id, String nickname, String email, String name, String profileImageUrl) {
+    public User(Long id, String nickname, String email, String name, String password) {
         this.id = id;
         this.nickname = nickname;
         this.email = email;
         this.name = name;
-        this.profileImageUrl = profileImageUrl;
+        this.password = password;
     }
 
+    public static User fromEntity(UserEntity userEntity) {
+        return User.builder()
+                .id(userEntity.getId())
+                .name(userEntity.getName())
+                .email(userEntity.getEmail())
+                .build();
+    }
 }

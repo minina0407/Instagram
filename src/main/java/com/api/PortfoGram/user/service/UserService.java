@@ -1,13 +1,16 @@
 package com.api.PortfoGram.user.service;
 
+import com.api.PortfoGram.auth.enums.AuthEnums;
+import com.api.PortfoGram.auth.utils.SecurityUtil;
 import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
-import com.api.PortfoGram.file.FileService;
+
 import com.api.PortfoGram.user.UserRepository;
 import com.api.PortfoGram.user.dto.Profile;
 import com.api.PortfoGram.user.dto.User;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,7 +21,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final FileService fileService;
+    private final PasswordEncoder passwordEncoder;
+
 
     @Transactional
     public Profile searchProfileById(Long userId) {
@@ -27,31 +31,34 @@ public class UserService {
 
         return Profile.builder()
                 .nickname(user.getNickname())
-                .profileImageUrl(user.getProfileImageUrl())
                 .followers(user.getFollowers())
                 .following(user.getFollowing())
                 .build();
     }
+    @Transactional
+    public UserEntity getMyUserWithAuthorities() {
+        return SecurityUtil.getCurrentUsername().flatMap(userRepository::findByEmail)
+                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND));
+    }
 
     @Transactional
-    public User createUser(String nickname, MultipartFile profileImage) throws IOException {
-        String profileImageUrl = null;
-        if (profileImage != null) {
-            profileImageUrl = fileService.upload(profileImage);
-        }
+    public void saveUser(User user) {
+        if(user.getEmail()==null)
+            throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID, "이미 가입되어있는 이메일입니다.");
 
-        UserEntity user = UserEntity.builder()
-                .nickname(nickname)
-                .profileImageUrl(profileImageUrl)
+        if(user.getNickname()==null)
+            throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID, "중복된 닉네임입니다.");
+
+        UserEntity userEntity = UserEntity.builder()
+                .nickname(user.getNickname())
+                .name(user.getName())
+                .email(user.getEmail())
+                .password(passwordEncoder.encode(user.getPassword()))
+                .role(AuthEnums.ROLE.ROLE_USER)
                 .build();
 
-        UserEntity savedUser = userRepository.save(user);
+       userRepository.save(userEntity);
 
-        return User.builder()
-                .id(savedUser.getId())
-                .nickname(savedUser.getNickname())
-                .profileImageUrl(savedUser.getProfileImageUrl())
-                .build();
     }
 
     @Transactional

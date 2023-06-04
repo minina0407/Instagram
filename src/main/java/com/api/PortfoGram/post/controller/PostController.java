@@ -5,14 +5,19 @@ import com.api.PortfoGram.post.service.PostService;
 
 import javax.validation.Valid;
 
+import com.api.PortfoGram.user.dto.User;
+import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 
 @RestController
@@ -30,26 +35,29 @@ public class PostController {
     @GetMapping
     public ResponseEntity<List<Post>> getAllPosts() {
         List<Post> posts = postService.getAllPosts();
-        return ResponseEntity.ok(posts);
+        return new ResponseEntity<>(posts,HttpStatus.OK);
     }
-    @PostMapping
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<Post> savePost(@Valid @RequestParam(name = "image") MultipartFile image, @RequestParam(name = "content") String content) throws IOException {
-        Post savedPost = postService.savePost(image, content);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedPost);
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Post> savePost(
+            @RequestParam(value = "images", required = true) List<MultipartFile> imageFiles,
+            @RequestParam(value = "content", required = true) String content) throws IOException {
+
+        postService.savePost(content, imageFiles);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<Post> updatePost(@PathVariable Long id, @Valid @RequestBody Post postRequest) throws IOException {
         Post updatedPost = postService.updatePost(id, postRequest);
-        return ResponseEntity.ok(updatedPost);
+        return new ResponseEntity<>(updatedPost,HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+    public ResponseEntity deletePost(@PathVariable Long id) {
         postService.deletePost(id);
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
