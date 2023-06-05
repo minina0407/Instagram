@@ -4,14 +4,12 @@ import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
 import com.api.PortfoGram.image.dto.Image;
 import com.api.PortfoGram.image.dto.Images;
-import com.api.PortfoGram.image.entity.ImageEntity;
 import com.api.PortfoGram.image.service.ImageService;
 import com.api.PortfoGram.post.PostRepository;
 import com.api.PortfoGram.post.dto.Post;
 import com.api.PortfoGram.post.dto.PostImage;
 import com.api.PortfoGram.post.entity.PostEntity;
 import com.api.PortfoGram.post.entity.PostImageEntity;
-import com.api.PortfoGram.user.dto.User;
 import com.api.PortfoGram.user.entity.UserEntity;
 import com.api.PortfoGram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,16 +29,16 @@ public class PostService {
     private final ImageService imageService;
 
     @Transactional
-    public void savePost(String content, List<MultipartFile> imageFiles) throws IOException {
+    public void savePost(String content, List<MultipartFile> imageFiles) {
         UserEntity user = userService.getMyUserWithAuthorities();
-         PostEntity postEntity = PostEntity.builder()
+
+        PostEntity postEntity = PostEntity.builder()
                 .user(user)
                 .content(content)
-                 .postImages(new ArrayList<>())
-                 .build();
+                .build();
 
         // 게시물 저장
-        PostEntity savedPostEntity= postRepository.save(postEntity);
+        PostEntity savedPostEntity = postRepository.save(postEntity);
 
         Images uploadedImages = imageService.uploadImage(imageFiles);
         List<Image> imageList = uploadedImages.getImages();
@@ -54,6 +50,7 @@ public class PostService {
             savedPostEntity.addImage(postImageEntity);
         }
     }
+
     @Transactional(readOnly = true)
     public Post getPostById(Long feedId) {
         PostEntity postEntity = postRepository.findPostById(feedId)
@@ -88,17 +85,14 @@ public class PostService {
     }
 
     @Transactional
-    public Post updatePost(Long id, Post postRequest) {
+    public void updatePost(Long id, Post postRequest) {
         PostEntity postEntity = postRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "게시글을 찾을 수 없습니다."));
 
-        postEntity.setContent(postRequest.getContent()); // 게시글 내용 업데이트
+        postEntity.updateContent(postRequest.getContent()); // 게시글 내용 업데이트
 
-        PostEntity updatedPostEntity = postRepository.save(postEntity);
+        postRepository.save(postEntity);
 
-        Post updatedPost = Post.fromEntity(updatedPostEntity);
-
-        return updatedPost;
     }
 
     @Transactional

@@ -29,19 +29,19 @@ public class PostController {
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
         Post post = postService.getPostById(id);
-        return ResponseEntity.ok(post);
+        return new ResponseEntity<>(post, HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<List<Post>> getAllPosts() {
         List<Post> posts = postService.getAllPosts();
-        return new ResponseEntity<>(posts,HttpStatus.OK);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Post> savePost(
             @RequestParam(value = "images", required = true) List<MultipartFile> imageFiles,
-            @RequestParam(value = "content", required = true) String content) throws IOException {
+            @RequestParam(value = "content", required = true) String content) {
 
         postService.savePost(content, imageFiles);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -49,9 +49,9 @@ public class PostController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @Valid @RequestBody Post postRequest) throws IOException {
-        Post updatedPost = postService.updatePost(id, postRequest);
-        return new ResponseEntity<>(updatedPost,HttpStatus.OK);
+    public ResponseEntity<Post> updatePost(@PathVariable Long id, @Valid @RequestBody Post post) throws IOException {
+        postService.updatePost(id, post);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

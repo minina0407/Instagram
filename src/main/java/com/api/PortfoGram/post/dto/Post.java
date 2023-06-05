@@ -33,42 +33,38 @@ public class Post {
     private Date createdAt;
     private List<PostImage> postImages;
     private List<Comment> comments;
+    private List<Reply> replies;
 
     @Builder
-    public Post(Long id, Long userId, String content, Date createdAt,  List<PostImage> postImages,List<Comment>comments) {
+    public Post(Long id, Long userId, String content, Date createdAt, List<PostImage> postImages, List<Comment> comments,List<Reply>replies) {
         this.id = id;
         this.userId = userId;
         this.content = content;
         this.createdAt = createdAt;
         this.postImages = postImages;
         this.comments = comments;
-
+        this.replies = replies;
     }
 
     public static Post fromEntity(PostEntity postEntity) {
         List<PostImage> postImages = postEntity.getPostImages().stream()
                 .map(PostImage::fromEntity)
                 .collect(Collectors.toList());
-      /*  List<Comment> comments = postEntity.getComments().stream()
+
+        List<Comment> comments = postEntity.getComments().stream()
                 .map(Comment::fromEntity)
                 .collect(Collectors.toList());
-        List<Reply> replies = postEntity.getReplies().stream()
-                .map(Reply::fromEntity)
-                .collect(Collectors.toList());
-        */
+
+
         return Post.builder()
                 .id(postEntity.getId())
                 .content(postEntity.getContent())
+                .userId(postEntity.getUser().getId())
                 .postImages(postImages)
-               // .comments(comments)
-                //.replies(replies)
-                // 추가적인 필드들 설정
+                .comments(comments)
                 .build();
     }
 
-    public void setPostImage(List<PostImage> postImages) {
-        this.postImages = postImages;
-    }
 }
 
 
