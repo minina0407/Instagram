@@ -1,5 +1,7 @@
 package com.api.PortfoGram.post.entity;
 
+import com.api.PortfoGram.comment.entity.CommentEntity;
+import com.api.PortfoGram.image.dto.Image;
 import com.api.PortfoGram.image.entity.ImageEntity;
 import com.api.PortfoGram.post.dto.Post;
 import com.api.PortfoGram.user.entity.UserEntity;
@@ -35,14 +37,18 @@ public class PostEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImageEntity> postImages;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentEntity> comments ;
     @Builder
-    public PostEntity(Long id, UserEntity user, String content, Date createdAt, List<PostImageEntity> postImages) {
+    public PostEntity(Long id, UserEntity user, String content, Date createdAt, List<PostImageEntity> postImages, List<CommentEntity> comments) {
         this.id = id;
         this.user = user;
         this.content = content;
         this.createdAt = createdAt;
         this.postImages = postImages;
+        this.comments = comments;
     }
+
 
 
     public void addImage(PostImageEntity postImageEntity) {
@@ -50,9 +56,11 @@ public class PostEntity {
         postImageEntity.setPost(this);
     }
 
-    public void setContent(String content) {
+    public void updateContent(String content) {
         this.content = content;
     }
-
+    public void updateImage(List<PostImageEntity> postImages){
+        this.postImages = postImages;
+    }
 
 }

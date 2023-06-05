@@ -1,6 +1,7 @@
 package com.api.PortfoGram.comment.entity;
 
 import com.api.PortfoGram.post.entity.PostEntity;
+import com.api.PortfoGram.reply.entity.ReplyEntity;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,7 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
-
+import java.util.List;
 
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -39,15 +40,19 @@ public class CommentEntity{
     private Date createdAt;
 
 
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
+    private List<ReplyEntity> replies ;
+
 
     // constructors, getters, and setters
     @Builder
-    public CommentEntity(Long id, UserEntity user, PostEntity post, String content, Date createdAt) {
+    public CommentEntity(Long id, UserEntity user, PostEntity post, String content, Date createdAt,List<ReplyEntity>replies) {
         this.id = id;
         this.user = user;
         this.post = post;
         this.content = content;
         this.createdAt = createdAt;
+        this.replies = replies;
     }
 }
 

@@ -33,6 +33,7 @@ public class ReplyEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+    
 
     @Builder
     public ReplyEntity(Long id, UserEntity user, CommentEntity comment, String content, Date createdAt) {
