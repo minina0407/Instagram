@@ -9,15 +9,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
 public class Profile {
     private String nickname;
-    private String profileImageUrl;
-    private long followers;
-    private long following;
+    private Long followers;
+    private Long following;
+    private String selfIntroduction;
 
     @Builder
-    public Profile(String nickname, String profileImageUrl, long followers, long following) {
+    public Profile(String nickname,  Long followers, Long following,String selfIntroduction) {
         this.nickname = nickname;
-        this.profileImageUrl = profileImageUrl;
         this.followers = followers;
         this.following = following;
+        this.selfIntroduction = selfIntroduction;
     }
 }

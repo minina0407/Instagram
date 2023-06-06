@@ -2,6 +2,7 @@ package com.api.PortfoGram.image.dto;
 
 import com.api.PortfoGram.image.entity.ImageEntity;
 import com.api.PortfoGram.user.dto.User;
+import com.api.PortfoGram.user.dto.UserImage;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -61,5 +62,6 @@ public class Image {
                 .endPoint(imageEntity.getEndPoint())
                 .build();
     }
+
 
 }

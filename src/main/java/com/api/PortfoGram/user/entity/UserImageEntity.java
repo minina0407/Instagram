@@ -1,5 +1,6 @@
 package com.api.PortfoGram.user.entity;
 import com.api.PortfoGram.image.entity.ImageEntity;
+import com.api.PortfoGram.user.dto.UserImage;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,12 +17,12 @@ public class UserImageEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "image_id", referencedColumnName = "image_id", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_id", nullable = false)
     private ImageEntity image;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
     @Builder
@@ -29,5 +30,9 @@ public class UserImageEntity {
         this.id = id;
         this.image = image;
         this.user = user;
+    }
+
+    public void setUser(UserEntity userEntity){
+        this.user = userEntity;
     }
 }

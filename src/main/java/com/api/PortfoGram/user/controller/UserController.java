@@ -14,27 +14,38 @@ import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private final UserService userService;
-    @GetMapping("/profile")
-    public ResponseEntity<Profile> getProfile(@RequestParam("user_id") Long userId) {
-        Profile profile = userService.searchProfileById(userId);
-        return ResponseEntity.ok(profile);
+
+    @GetMapping("/profile/{id}")
+    public ResponseEntity<Profile> getProfile(@PathVariable("id") Long id) {
+        Profile profile = userService.getProfileById(id);
+        return new ResponseEntity<>(profile,HttpStatus.OK);
     }
+
     @PostMapping
     public ResponseEntity<User> signUp(@Valid @RequestBody User user) {
         userService.saveUser(user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    @DeleteMapping("/withdrawal")
-    public ResponseEntity<Void> withdrawMembership(@RequestParam("id") Long userId) {
-        // Delete the member based on the provided ID
-        userService.deleteMember(userId);
 
-        return ResponseEntity.ok().build();
+    @PostMapping("/profile/profileImage")
+    public ResponseEntity<Void> saveUserImage(@RequestParam("profileImage") MultipartFile profileImage) throws IOException {
+        userService.saveUserImage(profileImage);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PutMapping("/profile")
+    public ResponseEntity<Profile> updateMyProfile(@Valid @RequestBody Profile profile) {
+        Profile updatedProfile = userService.updateMyProfile(profile);
+        return new ResponseEntity<>(updatedProfile, HttpStatus.OK);
+    }
 
+    @DeleteMapping("/withdrawal/{id}")
+    public ResponseEntity<Void> withdraw(@PathVariable("id") Long userId) {
+        userService.deleteMember(userId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
