@@ -1,6 +1,5 @@
 pipeline {
     agent any 	// 사용 가능한 에이전트에서 이 파이프라인 또는 해당 단계를 실행
-# git 프로젝트 credentials 는 access token 으로 사용
     stages {
         stage('Prepare') {
             steps {
