@@ -35,16 +35,17 @@ public class UserEntity {
     private AuthEnums.ROLE role;
 
     @Column(name = "followers", nullable = false)
-    private long followers;
+    private Long followers;
     @Column(name = "followings", nullable = false)
-    private long following;
+    private Long followings;
 
-    @ManyToOne
-    @JoinColumn(name = "profile_image_id", referencedColumnName = "image_id")
+
+    @OneToOne(mappedBy = "user")
     private UserImageEntity profileImage;
 
+
     @Builder
-    public UserEntity(Long id, String nickname, String password, String email, String name, AuthEnums.ROLE role, long followers, long following, UserImageEntity profileImage) {
+    public UserEntity(Long id, String nickname, String password, String email, String name, AuthEnums.ROLE role, Long followers, Long followings, UserImageEntity profileImage) {
         this.id = id;
         this.nickname = nickname;
         this.password = password;
@@ -52,12 +53,8 @@ public class UserEntity {
         this.name = name;
         this.role = role;
         this.followers = followers;
-        this.following = following;
+        this.followings = followings;
         this.profileImage = profileImage;
     }
-
-
-
-
 
 }

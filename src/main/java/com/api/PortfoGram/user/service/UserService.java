@@ -32,7 +32,7 @@ public class UserService {
         return Profile.builder()
                 .nickname(user.getNickname())
                 .followers(user.getFollowers())
-                .following(user.getFollowing())
+                .following(user.getFollowings())
                 .build();
     }
     @Transactional

@@ -16,12 +16,12 @@ public class UserImageEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id", referencedColumnName = "image_id", nullable = false)
     private ImageEntity image;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private UserEntity user;
 
     @Builder
