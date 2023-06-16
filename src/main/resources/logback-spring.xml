@@ -75,7 +75,7 @@
         </filter>
     </appender>
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>132.226.225.106:5000</destination>
+        <destination>132.226.225:5000</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
     <!-- Root 로거 설정 -->
