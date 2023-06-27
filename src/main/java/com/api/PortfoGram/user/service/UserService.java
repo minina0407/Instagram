@@ -68,4 +68,11 @@ public class UserService {
 
         userRepository.delete(userEntity);
     }
+
+    public UserEntity findById(Long id) {
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Member not found"));
+
+        return userEntity;
+    }
 }

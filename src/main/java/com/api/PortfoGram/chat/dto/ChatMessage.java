@@ -1,0 +1,54 @@
+package com.api.PortfoGram.chat.dto;
+
+import com.api.PortfoGram.chat.entity.ChatMessageEntity;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Getter
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
+public class ChatMessage implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    private Long id;
+
+    private Long senderId;
+    private Long receiverId;
+    private String content;
+    private LocalDateTime createdAt;
+    private Long chatRoomId;
+    @Builder
+    public ChatMessage(Long id, Long senderId,Long receiverId, String content, LocalDateTime createdAt, Long chatRoomId) {
+        this.id = id;
+        this.senderId = senderId;
+        this.receiverId = receiverId;
+        this.content = content;
+        this.createdAt = createdAt;
+        this.chatRoomId =chatRoomId;
+    }
+    public ChatMessage toEntity(ChatMessageEntity chatMessageEntity){
+        return ChatMessage.builder()
+                .id(chatMessageEntity.getId())
+                .senderId(chatMessageEntity.getSenderId())
+                .receiverId(chatMessageEntity.getReceiverId())
+                .content(chatMessageEntity.getContent())
+                .createdAt(chatMessageEntity.getCreatedAt())
+                .chatRoomId(chatMessageEntity.getChatRoom().getId())
+                .build();
+    }
+    public static ChatMessage fromEntity(ChatMessageEntity chatMessageEntity) {
+        return ChatMessage.builder()
+                .id(chatMessageEntity.getId())
+                .senderId(chatMessageEntity.getSenderId())
+                .receiverId(chatMessageEntity.getReceiverId())
+                .content(chatMessageEntity.getContent())
+                .createdAt(chatMessageEntity.getCreatedAt())
+                .chatRoomId(chatMessageEntity.getChatRoom().getId())
+                .build();
+    }
+    // Getter and Setter methods
+}

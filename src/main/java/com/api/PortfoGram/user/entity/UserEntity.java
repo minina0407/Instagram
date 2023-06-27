@@ -2,12 +2,16 @@ package com.api.PortfoGram.user.entity;
 
 
 import com.api.PortfoGram.auth.enums.AuthEnums;
+import com.api.PortfoGram.chat.entity.ChatRoomEntity;
+import com.api.PortfoGram.chat.entity.UserChatRoomEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -44,8 +48,11 @@ public class UserEntity {
     private UserImageEntity profileImage;
 
 
+    @OneToMany(mappedBy = "user")
+    private List<UserChatRoomEntity> userChatRooms;
+
     @Builder
-    public UserEntity(Long id, String nickname, String password, String email, String name, AuthEnums.ROLE role, Long followers, Long followings, UserImageEntity profileImage) {
+    public UserEntity(Long id, String nickname, String password, String email, String name, AuthEnums.ROLE role, Long followers, Long followings, UserImageEntity profileImage, List<UserChatRoomEntity> userChatRooms) {
         this.id = id;
         this.nickname = nickname;
         this.password = password;
@@ -55,6 +62,9 @@ public class UserEntity {
         this.followers = followers;
         this.followings = followings;
         this.profileImage = profileImage;
+        this.userChatRooms = userChatRooms;
     }
+
+
 
 }
