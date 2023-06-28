@@ -45,5 +45,6 @@ logs/
 
 # Properties files
 *.properties
+*.yml
 !application.properties # application.properties 파일은 예외로 추가
 
