@@ -1,6 +1,7 @@
 package com.api.PortfoGram.post.dto;
 
 import com.api.PortfoGram.comment.dto.Comment;
+import com.api.PortfoGram.comment.entity.CommentEntity;
 import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
 import com.api.PortfoGram.image.dto.Image;
@@ -36,7 +37,7 @@ public class Post {
     private List<Reply> replies;
 
     @Builder
-    public Post(Long id, Long userId, String content, Date createdAt, List<PostImage> postImages, List<Comment> comments,List<Reply>replies) {
+    public Post(Long id, Long userId, String content, Date createdAt, List<PostImage> postImages, List<Comment> comments, List<Reply> replies) {
         this.id = id;
         this.userId = userId;
         this.content = content;
@@ -64,7 +65,6 @@ public class Post {
                 .comments(comments)
                 .build();
     }
-
 }
 
 

@@ -1,6 +1,7 @@
 package com.api.PortfoGram.reply.entity;
 
 import com.api.PortfoGram.comment.entity.CommentEntity;
+import com.api.PortfoGram.reply.dto.Reply;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,7 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Locale;
 
 @Entity
 @Table(name = "reply")
@@ -32,11 +35,11 @@ public class ReplyEntity {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private LocalDateTime createdAt;
     
 
     @Builder
-    public ReplyEntity(Long id, UserEntity user, CommentEntity comment, String content, Date createdAt) {
+    public ReplyEntity(Long id, UserEntity user, CommentEntity comment, String content, LocalDateTime createdAt) {
         this.id = id;
         this.user = user;
         this.comment = comment;
@@ -45,5 +48,14 @@ public class ReplyEntity {
     }
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Reply fromEntity(ReplyEntity replyEntity) {
+        return Reply.builder()
+                .id(replyEntity.getId())
+                .commentId(replyEntity.getComment().getId())
+                .content(replyEntity.getContent())
+                .createdAt(replyEntity.getCreatedAt())
+                .build();
     }
 }

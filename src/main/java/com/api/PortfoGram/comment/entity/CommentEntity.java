@@ -1,5 +1,6 @@
 package com.api.PortfoGram.comment.entity;
 
+import com.api.PortfoGram.comment.dto.Comment;
 import com.api.PortfoGram.post.entity.PostEntity;
 import com.api.PortfoGram.reply.entity.ReplyEntity;
 import com.api.PortfoGram.user.entity.UserEntity;
@@ -53,6 +54,18 @@ public class CommentEntity{
         this.content = content;
         this.createdAt = createdAt;
         this.replies = replies;
+    }
+    public void setContent(String content){
+        this.content = content;
+    }
+
+    public Comment fromEntity(CommentEntity commentEntity) {
+        return Comment.builder()
+                .id(commentEntity.getId())
+                .postId(commentEntity.getPost().getId())
+                .content(commentEntity.getContent())
+                .createdAt(commentEntity.getCreatedAt())
+                .build();
     }
 }
 
