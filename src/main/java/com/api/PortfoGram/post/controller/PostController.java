@@ -1,5 +1,7 @@
 package com.api.PortfoGram.post.controller;
 
+import com.api.PortfoGram.comment.dto.Comment;
+import com.api.PortfoGram.comment.service.CommentService;
 import com.api.PortfoGram.post.dto.Post;
 import com.api.PortfoGram.post.service.PostService;
 
@@ -8,6 +10,10 @@ import javax.validation.Valid;
 import com.api.PortfoGram.user.dto.User;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +31,7 @@ import java.util.List;
 @RequestMapping("/api/v1/posts")
 public class PostController {
     private final PostService postService;
+    private final CommentService commentService;
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
@@ -36,6 +43,13 @@ public class PostController {
     public ResponseEntity<List<Post>> getAllPosts() {
         List<Post> posts = postService.getAllPosts();
         return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
+     @GetMapping("/{postId}/comments")
+    public ResponseEntity<Page<Comment>> getCommentsByPostId(@PathVariable Long postId,
+                                                             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<Comment> comments = commentService.getCommentsByPostId(postId, pageable);
+        return new ResponseEntity<>(comments,HttpStatus.OK);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,6 +66,13 @@ public class PostService {
                 .content(postEntity.getContent())
                 .postImages(postImages)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public PostEntity getPoseEntityId(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+
     }
 
     @Transactional(readOnly = true)
