@@ -1,7 +1,7 @@
 package com.api.PortfoGram.auth.service;
 
-import com.api.PortfoGram.user.UserRepository;
 import com.api.PortfoGram.user.entity.UserEntity;
+import com.api.PortfoGram.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

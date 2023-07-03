@@ -1,15 +1,13 @@
-package com.api.PortfoGram.image.service;
+package com.api.PortfoGram.Image.service;
 
+import com.api.PortfoGram.Image.dto.Image;
+import com.api.PortfoGram.Image.repository.ImageRepository;
 import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
-import com.api.PortfoGram.image.ImageRepository;
 
 
-import com.api.PortfoGram.image.dto.Image;
-import com.api.PortfoGram.image.dto.Images;
-import com.api.PortfoGram.image.entity.ImageEntity;
-import com.api.PortfoGram.post.dto.Post;
-import com.api.PortfoGram.post.entity.PostEntity;
+import com.api.PortfoGram.Image.dto.Images;
+import com.api.PortfoGram.Image.entity.ImageEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ImageService {
+public class PortfolioImageService {
     private final ImageRepository imageRepository;
     @Value("${endpoint}")
     private String endpoint;

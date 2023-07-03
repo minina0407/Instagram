@@ -6,8 +6,8 @@ import com.api.PortfoGram.comment.entity.CommentEntity;
 import com.api.PortfoGram.comment.repository.CommentRepository;
 import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
-import com.api.PortfoGram.post.entity.PostEntity;
-import com.api.PortfoGram.post.service.PostService;
+import com.api.PortfoGram.portfolio.entity.PortfolioEntity;
+import com.api.PortfoGram.portfolio.service.PortfolioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,13 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
-    private final PostService postService;
+    private final PortfolioService portfolioService;
 
 
     @Transactional(readOnly = true)
-    public Page<Comment> getCommentsByPostId(Long postId, Pageable pageable) {
-        PostEntity postEntity = postService.getPoseEntityId(postId);
-        Page<CommentEntity> commentEntitiesPage = commentRepository.findAllByPost(postEntity, pageable);
+    public Page<Comment> getCommentsByPostId(Long portfolioId, Pageable pageable) {
+        PortfolioEntity portfolioEntity = portfolioService.getPoseEntityId(portfolioId);
+        Page<CommentEntity> commentEntitiesPage = commentRepository.findAllByPortfolio(portfolioEntity, pageable);
         return commentEntitiesPage.map(Comment::fromEntity);
 
     }

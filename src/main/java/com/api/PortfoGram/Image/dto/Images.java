@@ -1,7 +1,7 @@
-package com.api.PortfoGram.image.dto;
+package com.api.PortfoGram.Image.dto;
 
-import com.api.PortfoGram.image.entity.ImageEntity;
-import com.api.PortfoGram.post.entity.PostEntity;
+import com.api.PortfoGram.Image.entity.ImageEntity;
+import com.api.PortfoGram.portfolio.entity.PortfolioEntity;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class Images {
     private List<Image> images;
 
-    public List<ImageEntity> toEntity(Images images, UserEntity user, PostEntity post) {
+    public List<ImageEntity> toEntity(Images images, UserEntity user, PortfolioEntity post) {
         return images.getImages().stream()
                 .map(image -> ImageEntity.builder()
                         .imageId(image.getImageId())

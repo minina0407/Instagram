@@ -1,7 +1,6 @@
-package com.api.PortfoGram.image.dto;
+package com.api.PortfoGram.Image.dto;
 
-import com.api.PortfoGram.image.entity.ImageEntity;
-import com.api.PortfoGram.user.dto.User;
+import com.api.PortfoGram.Image.entity.ImageEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,8 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

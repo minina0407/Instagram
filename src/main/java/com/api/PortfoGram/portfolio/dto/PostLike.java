@@ -1,4 +1,4 @@
-package com.api.PortfoGram.post.dto;
+package com.api.PortfoGram.portfolio.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;

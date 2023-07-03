@@ -1,5 +1,4 @@
-package com.api.PortfoGram.post.entity;
-import com.api.PortfoGram.post.dto.PostLike;
+package com.api.PortfoGram.portfolio.entity;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -11,8 +10,8 @@ import javax.persistence.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 
 @Entity
-@Table(name = "post_like")
-public class PostLikeEntity {
+@Table(name = "portfolio_like")
+public class PortfolioLikeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,14 +21,14 @@ public class PostLikeEntity {
     private UserEntity user;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
-    private PostEntity post;
+    @JoinColumn(name = "portfolio_id")
+    private PortfolioEntity portfolio;
 
     @Builder
-    public PostLikeEntity(Long id, UserEntity user, PostEntity post) {
+    public PortfolioLikeEntity(Long id, UserEntity user, PortfolioEntity portfolio) {
         this.id = id;
         this.user = user;
-        this.post = post;
+        this.portfolio = portfolio;
     }
 
 }

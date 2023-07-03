@@ -1,11 +1,7 @@
-package com.api.PortfoGram.image.entity;
+package com.api.PortfoGram.Image.entity;
 
-import com.api.PortfoGram.image.dto.Image;
-import com.api.PortfoGram.image.dto.Images;
-import com.api.PortfoGram.post.entity.PostEntity;
-import com.api.PortfoGram.post.entity.PostImageEntity;
-import com.api.PortfoGram.user.dto.User;
-import com.api.PortfoGram.user.entity.UserEntity;
+import com.api.PortfoGram.Image.dto.Image;
+import com.api.PortfoGram.portfolio.entity.PortfolioImageEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,10 +44,10 @@ public class ImageEntity {
     private String endPoint;
 
     @OneToOne(mappedBy = "image", fetch = FetchType.LAZY)
-    private PostImageEntity postImage;
+    private PortfolioImageEntity postImage;
 
     @Builder
-    public ImageEntity(Long imageId, LocalDateTime createdAt, LocalDateTime deletedAt, int deletedYn, String originalFileName, Long fileSize, String fileName, String endPoint, PostImageEntity postImage) {
+    public ImageEntity(Long imageId, LocalDateTime createdAt, LocalDateTime deletedAt, int deletedYn, String originalFileName, Long fileSize, String fileName, String endPoint, PortfolioImageEntity postImage) {
         this.imageId = imageId;
         this.createdAt = createdAt;
         this.deletedAt = deletedAt;

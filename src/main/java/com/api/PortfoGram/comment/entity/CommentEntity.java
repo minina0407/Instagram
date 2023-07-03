@@ -1,7 +1,7 @@
 package com.api.PortfoGram.comment.entity;
 
 import com.api.PortfoGram.comment.dto.Comment;
-import com.api.PortfoGram.post.entity.PostEntity;
+import com.api.PortfoGram.portfolio.entity.PortfolioEntity;
 import com.api.PortfoGram.reply.entity.ReplyEntity;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.AccessLevel;
@@ -29,8 +29,8 @@ public class CommentEntity{
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
-    private PostEntity post;
+    @JoinColumn(name = "portfolio_id", nullable = false)
+    private PortfolioEntity portfolio;
 
     @Column(nullable = false)
     private String content;
@@ -45,12 +45,11 @@ public class CommentEntity{
     private List<ReplyEntity> replies ;
 
 
-    // constructors, getters, and setters
     @Builder
-    public CommentEntity(Long id, UserEntity user, PostEntity post, String content, Date createdAt,List<ReplyEntity>replies) {
+    public CommentEntity(Long id, UserEntity user, PortfolioEntity portfolio, String content, Date createdAt, List<ReplyEntity>replies) {
         this.id = id;
         this.user = user;
-        this.post = post;
+        this.portfolio= portfolio;
         this.content = content;
         this.createdAt = createdAt;
         this.replies = replies;
@@ -62,7 +61,7 @@ public class CommentEntity{
     public Comment fromEntity(CommentEntity commentEntity) {
         return Comment.builder()
                 .id(commentEntity.getId())
-                .postId(commentEntity.getPost().getId())
+                .postId(commentEntity.getPortfolio().getId())
                 .content(commentEntity.getContent())
                 .createdAt(commentEntity.getCreatedAt())
                 .build();

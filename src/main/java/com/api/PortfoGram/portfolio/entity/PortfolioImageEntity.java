@@ -1,6 +1,6 @@
-package com.api.PortfoGram.post.entity;
+package com.api.PortfoGram.portfolio.entity;
 
-import com.api.PortfoGram.image.entity.ImageEntity;
+import com.api.PortfoGram.Image.entity.ImageEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,8 +11,8 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "post_image")
-public class PostImageEntity {
+@Table(name = "portfolio_image")
+public class PortfolioImageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,18 +22,17 @@ public class PostImageEntity {
     private ImageEntity image;
 
     @ManyToOne
-    @JoinColumn(name = "post_id", referencedColumnName = "id", nullable = false)
-    private PostEntity post;
+    @JoinColumn(name = "portfolio_id", referencedColumnName = "id", nullable = false)
+    private PortfolioEntity portfolio;
 
     @Builder
-    public PostImageEntity(Long id, ImageEntity image, PostEntity post) {
+    public PortfolioImageEntity(Long id, ImageEntity image, PortfolioEntity portfolio) {
         this.id = id;
         this.image = image;
-        this.post = post;
+        this.portfolio = portfolio;
     }
 
-    public void setPost(PostEntity post) {
-        this.post = post;
+    public void setPost(PortfolioEntity post) {
+        this.portfolio = post;
     }
-
 }

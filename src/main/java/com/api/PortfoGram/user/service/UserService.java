@@ -5,11 +5,12 @@ import com.api.PortfoGram.auth.utils.SecurityUtil;
 import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
 
-import com.api.PortfoGram.user.UserRepository;
+
 import com.api.PortfoGram.user.dto.Profile;
 import com.api.PortfoGram.user.dto.User;
 import com.api.PortfoGram.user.entity.FollowEntity;
 import com.api.PortfoGram.user.entity.UserEntity;
+import com.api.PortfoGram.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -1,7 +1,6 @@
-package com.api.PortfoGram.image;
+package com.api.PortfoGram.Image.repository;
 
-import com.api.PortfoGram.image.entity.ImageEntity;
-import com.api.PortfoGram.post.entity.PostEntity;
+import com.api.PortfoGram.Image.entity.ImageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

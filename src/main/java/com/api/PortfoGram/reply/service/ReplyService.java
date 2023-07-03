@@ -1,13 +1,12 @@
 package com.api.PortfoGram.reply.service;
 
-import com.api.PortfoGram.comment.dto.Comment;
 import com.api.PortfoGram.comment.entity.CommentEntity;
 import com.api.PortfoGram.comment.service.CommentService;
 import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
-import com.api.PortfoGram.reply.ReplyRepository;
 import com.api.PortfoGram.reply.dto.Reply;
 import com.api.PortfoGram.reply.entity.ReplyEntity;
+import com.api.PortfoGram.reply.repository.ReplyRepository;
 import com.api.PortfoGram.user.entity.UserEntity;
 import com.api.PortfoGram.user.service.UserService;
 import lombok.RequiredArgsConstructor;

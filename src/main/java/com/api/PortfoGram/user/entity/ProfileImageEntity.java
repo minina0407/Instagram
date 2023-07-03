@@ -1,5 +1,5 @@
 package com.api.PortfoGram.user.entity;
-import com.api.PortfoGram.image.entity.ImageEntity;
+import com.api.PortfoGram.Image.entity.ImageEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "user_image")
+@Table(name = "profile_image")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserImageEntity {
+public class ProfileImageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +25,7 @@ public class UserImageEntity {
     private UserEntity user;
 
     @Builder
-    public UserImageEntity(Long id, ImageEntity image, UserEntity user) {
+    public ProfileImageEntity(Long id, ImageEntity image, UserEntity user) {
         this.id = id;
         this.image = image;
         this.user = user;

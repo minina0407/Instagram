@@ -1,7 +1,6 @@
-package com.api.PortfoGram.reply;
+package com.api.PortfoGram.reply.repository;
 
 import com.api.PortfoGram.comment.entity.CommentEntity;
-import com.api.PortfoGram.post.entity.PostEntity;
 import com.api.PortfoGram.reply.entity.ReplyEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
