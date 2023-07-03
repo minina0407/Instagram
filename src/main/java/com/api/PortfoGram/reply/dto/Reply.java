@@ -8,13 +8,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
-public class Reply{
+public class Reply implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Long id;
     private Long userId;
     private Long commentId;

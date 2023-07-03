@@ -5,19 +5,22 @@ import com.api.PortfoGram.exception.dto.ExceptionEnum;
 import com.api.PortfoGram.image.dto.Image;
 import com.api.PortfoGram.image.dto.Images;
 import com.api.PortfoGram.image.service.ImageService;
-import com.api.PortfoGram.post.PostRepository;
 import com.api.PortfoGram.post.dto.Post;
 import com.api.PortfoGram.post.dto.PostImage;
 import com.api.PortfoGram.post.entity.PostEntity;
 import com.api.PortfoGram.post.entity.PostImageEntity;
+import com.api.PortfoGram.post.repository.PostRepository;
 import com.api.PortfoGram.user.entity.UserEntity;
 import com.api.PortfoGram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +29,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserService userService;
     private final ImageService imageService;
+    private final RedisTemplate redisTemplate;
 
     @Transactional
     public void savePost(String content, List<MultipartFile> imageFiles) {
@@ -50,22 +54,74 @@ public class PostService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public Post getPostById(Long feedId) {
-        PostEntity postEntity = postRepository.findPostById(feedId)
-                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "피드를 찾을 수 없습니다."));
 
-        List<PostImage> postImages = postEntity.getPostImages()
-                .stream()
-                .map(PostImage::fromEntity)
+    @Transactional
+    public void incrementLikeCount(Long postId) {
+        PostEntity postEntity = postRepository.findById(postId)
+                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND,"Post not found"));
+
+        int currentLikeCount = postEntity.getLikeCount();
+        int updatedLikeCount = currentLikeCount + 1;
+        postEntity.setLikeCount(updatedLikeCount);
+
+        postRepository.save(postEntity);
+    }
+    @Transactional
+    public List<Post> getFollowedPortfolios(Long userId) {
+        String redisKey = "user:" + userId + ":followedPortfolios";
+        Set<String> followedPortfolioIds = redisTemplate.opsForSet().members(redisKey);
+
+        if (followedPortfolioIds != null && !followedPortfolioIds.isEmpty()) {
+            List<Long> portfolioIds = followedPortfolioIds.stream()
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+
+            List<PostEntity> followedPortfolioEntities = postRepository.findAllById(portfolioIds);
+            return followedPortfolioEntities.stream()
+                    .map(Post::fromEntity)
+                    .collect(Collectors.toList());
+        }
+
+        List<PostEntity> followedPortfolioEntities = postRepository.findFollowedPosts(userId);
+        List<Post> followedPortfolios = followedPortfolioEntities.stream()
+                .map(Post::fromEntity)
                 .collect(Collectors.toList());
 
-        return Post.builder()
-                .id(postEntity.getId())
-                .userId(postEntity.getUser().getId())
-                .content(postEntity.getContent())
-                .postImages(postImages)
-                .build();
+        if (!followedPortfolios.isEmpty()) {
+            Set<String> updatedPortfolioIds = followedPortfolios.stream()
+                    .map(postDto -> String.valueOf(postDto.getId()))
+                    .collect(Collectors.toSet());
+
+            redisTemplate.opsForSet().add(redisKey, updatedPortfolioIds.toArray(new String[0]));
+        }
+
+        return followedPortfolios;
+    }
+
+    @Transactional(readOnly = true)
+    public Post getPostById(Long feedId) {
+        String redisKey = "post:" + feedId;
+        Post post = (Post) redisTemplate.opsForValue().get(redisKey);
+
+        if (post == null) {
+            PostEntity postEntity = postRepository.findPostById(feedId)
+                    .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "피드를 찾을 수 없습니다."));
+            List<PostImage> postImages = postEntity.getPostImages()
+                    .stream()
+                    .map(PostImage::fromEntity)
+                    .collect(Collectors.toList());
+
+            post = Post.builder()
+                    .id(postEntity.getId())
+                    .userId(postEntity.getUser().getId())
+                    .content(postEntity.getContent())
+                    .postImages(postImages)
+                    .build();
+
+            redisTemplate.opsForValue().set(redisKey, post);
+        }
+
+        return post;
     }
 
     @Transactional(readOnly = true)

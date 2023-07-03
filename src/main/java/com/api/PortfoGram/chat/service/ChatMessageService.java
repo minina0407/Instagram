@@ -5,7 +5,6 @@ import com.api.PortfoGram.chat.entity.ChatMessageEntity;
 import com.api.PortfoGram.chat.entity.ChatRoomEntity;
 import com.api.PortfoGram.chat.repository.ChatMessageRepository;
 import com.api.PortfoGram.user.entity.UserEntity;
-import com.api.PortfoGram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomService chatRoomService;
-
     @Transactional
     public void saveChatMessage(UserEntity sender, String content, Long receiverId) {
         ChatRoomEntity chatRoom = chatRoomService.getChatRoomById(receiverId);

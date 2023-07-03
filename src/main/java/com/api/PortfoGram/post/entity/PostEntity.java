@@ -8,6 +8,7 @@ import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,22 +35,27 @@ public class PostEntity {
     @CreationTimestamp
     private Date createdAt;
 
+    @Column(name = "like_count", nullable = false)
+    private int likeCount;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImageEntity> postImages;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentEntity> comments ;
     @Builder
-    public PostEntity(Long id, UserEntity user, String content, Date createdAt, List<PostImageEntity> postImages, List<CommentEntity> comments) {
+    public PostEntity(Long id, UserEntity user, String content, Date createdAt, int likeCount, List<PostImageEntity> postImages, List<CommentEntity> comments) {
         this.id = id;
         this.user = user;
         this.content = content;
         this.createdAt = createdAt;
-        this.postImages = postImages;
+        this.likeCount = likeCount;
         this.comments = comments;
+        this.postImages = new ArrayList<>(); // Initialize the postImages list
+        if (postImages != null) {
+            this.postImages.addAll(postImages);
+        }
     }
-
-
 
     public void addImage(PostImageEntity postImageEntity) {
         postImages.add(postImageEntity);
@@ -62,5 +68,7 @@ public class PostEntity {
     public void updateImage(List<PostImageEntity> postImages){
         this.postImages = postImages;
     }
-
+    public  void setLikeCount(int updatedLikeCount){
+        this.likeCount = updatedLikeCount;
+    }
 }

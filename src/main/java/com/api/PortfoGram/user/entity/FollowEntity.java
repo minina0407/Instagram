@@ -1,15 +1,19 @@
 package com.api.PortfoGram.user.entity;
 
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.Id;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "follow")
 public class FollowEntity {
-    @javax.persistence.Id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,7 +31,12 @@ public class FollowEntity {
     @CreationTimestamp
     private Date createdAt;
 
-
-
+    @Builder
+    public FollowEntity(Long id, UserEntity follower, UserEntity following, Date createdAt) {
+        this.id = id;
+        this.follower = follower;
+        this.following = following;
+        this.createdAt = createdAt;
+    }
 }
 

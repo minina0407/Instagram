@@ -3,12 +3,15 @@ package com.api.PortfoGram.post.controller;
 import com.api.PortfoGram.comment.dto.Comment;
 import com.api.PortfoGram.comment.service.CommentService;
 import com.api.PortfoGram.post.dto.Post;
+import com.api.PortfoGram.post.dto.PostLike;
+import com.api.PortfoGram.post.service.PostLikeService;
 import com.api.PortfoGram.post.service.PostService;
 
 import javax.validation.Valid;
 
 import com.api.PortfoGram.user.dto.User;
 import com.api.PortfoGram.user.entity.UserEntity;
+import com.api.PortfoGram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,12 +21,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 
 @RestController
@@ -32,6 +33,8 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
     private final CommentService commentService;
+    private final PostLikeService postLikeService;
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
@@ -44,7 +47,11 @@ public class PostController {
         List<Post> posts = postService.getAllPosts();
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
-
+    @GetMapping("/following/{userId}")
+    public ResponseEntity<List<Post>> getFollowedPortfolios(@PathVariable Long userId) {
+        List<Post> followedPortfolios = postService.getFollowedPortfolios(userId);
+        return ResponseEntity.ok(followedPortfolios);
+    }
      @GetMapping("/{postId}/comments")
     public ResponseEntity<Page<Comment>> getCommentsByPostId(@PathVariable Long postId,
                                                              @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -58,6 +65,11 @@ public class PostController {
             @RequestParam(value = "content", required = true) String content) {
 
         postService.savePost(content, imageFiles);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @PostMapping("/{postId}/likes")
+    public ResponseEntity<PostLike> likePost(@PathVariable Long postId) {
+         postLikeService.likePost(postId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
