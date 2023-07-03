@@ -34,7 +34,6 @@ public class ReplyEntity {
     private String content;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
     
 

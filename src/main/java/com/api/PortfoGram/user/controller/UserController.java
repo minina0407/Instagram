@@ -1,11 +1,15 @@
 package com.api.PortfoGram.user.controller;
 
+import com.api.PortfoGram.exception.dto.BadRequestException;
+import com.api.PortfoGram.exception.dto.ExceptionEnum;
 import com.api.PortfoGram.user.dto.Profile;
 import com.api.PortfoGram.user.dto.User;
+import com.api.PortfoGram.user.entity.UserEntity;
 import com.api.PortfoGram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +32,7 @@ public class UserController {
         userService.saveUser(user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
     @DeleteMapping("/withdrawal")
     public ResponseEntity<Void> withdrawMembership(@RequestParam("id") Long userId) {
         // Delete the member based on the provided ID

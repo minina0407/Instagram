@@ -38,10 +38,11 @@ public class UserEntity {
     @Column(name = "role", nullable = false)
     private AuthEnums.ROLE role;
 
-    @Column(name = "followers", nullable = false)
-    private Long followers;
-    @Column(name = "followings", nullable = false)
-    private Long followings;
+    @OneToMany(mappedBy = "follower")
+    private List<FollowEntity> followers;
+
+    @OneToMany(mappedBy = "following")
+    private List<FollowEntity> followings;
 
 
     @OneToOne(mappedBy = "user")
@@ -52,7 +53,7 @@ public class UserEntity {
     private List<UserChatRoomEntity> userChatRooms;
 
     @Builder
-    public UserEntity(Long id, String nickname, String password, String email, String name, AuthEnums.ROLE role, Long followers, Long followings, UserImageEntity profileImage, List<UserChatRoomEntity> userChatRooms) {
+    public UserEntity(Long id, String nickname, String password, String email, String name, AuthEnums.ROLE role, List<FollowEntity> followers, List<FollowEntity> followings, UserImageEntity profileImage, List<UserChatRoomEntity> userChatRooms) {
         this.id = id;
         this.nickname = nickname;
         this.password = password;
@@ -64,7 +65,6 @@ public class UserEntity {
         this.profileImage = profileImage;
         this.userChatRooms = userChatRooms;
     }
-
 
 
 }

@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 public class Profile {
     private String nickname;
     private String profileImageUrl;
-    private long followers;
-    private long following;
+    private Long followers;
+    private Long following;
 
     @Builder
-    public Profile(String nickname, String profileImageUrl, long followers, long following) {
+    public Profile(String nickname, String profileImageUrl, Long followers, Long following) {
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
         this.followers = followers;
