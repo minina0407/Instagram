@@ -4,8 +4,9 @@ import com.api.PortfoGram.auth.enums.AuthEnums;
 import com.api.PortfoGram.auth.utils.SecurityUtil;
 import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
-
-
+import com.api.PortfoGram.portfolio.dto.Portfolio;
+import com.api.PortfoGram.portfolio.entity.PortfolioEntity;
+import com.api.PortfoGram.portfolio.service.PortfolioService;
 import com.api.PortfoGram.user.dto.Profile;
 import com.api.PortfoGram.user.dto.User;
 import com.api.PortfoGram.user.entity.FollowEntity;
@@ -15,23 +16,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
-import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
-
-    @Transactional
+    @Transactional(readOnly = true)
     public Profile searchProfileById(Long userId) {
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "유저를 찾을 수 없습니다."));
 
         return Profile.builder()
                 .nickname(user.getNickname())
@@ -40,19 +41,32 @@ public class UserService {
                 .build();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        List<UserEntity> userEntities = userRepository.findAll();
+        return userEntities.stream()
+                .map(User::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public UserEntity getMyUserWithAuthorities() {
-        return SecurityUtil.getCurrentUsername().flatMap(userRepository::findByEmail)
+        UserEntity userEntity = SecurityUtil.getCurrentUsername()
+                .flatMap(userRepository::findByEmail)
                 .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND));
+
+        return userEntity;
     }
 
     @Transactional
     public void saveUser(User user) {
-        if (user.getEmail() == null)
-            throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID, "이미 가입되어있는 이메일입니다.");
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID, "이미 가입되어 있는 이메일입니다.");
+        }
 
-        if (user.getNickname() == null)
+        if (userRepository.existsByNickname(user.getNickname())) {
             throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID, "중복된 닉네임입니다.");
+        }
 
         UserEntity userEntity = UserEntity.builder()
                 .nickname(user.getNickname())
@@ -63,22 +77,38 @@ public class UserService {
                 .build();
 
         userRepository.save(userEntity);
+    }
+
+    @Transactional
+    public void followUser(Long userId, Long portfolioId) {
+        String redisKey = getRedisKey(userId);
+        String portfolioIdStr = String.valueOf(portfolioId);
+        redisTemplate.opsForSet().add(redisKey, portfolioIdStr);
+    }
+
+    @Transactional
+    public void unfollowUser(Long userId, Long portfolioId) {
+        String redisKey = getRedisKey(userId);
+        String portfolioIdStr = String.valueOf(portfolioId);
+        redisTemplate.opsForSet().remove(redisKey, portfolioIdStr);
 
     }
 
+    private String getRedisKey(Long userId) {
+        return "user:" + userId + ":followedPortfolios";
+    }
 
     @Transactional
     public void deleteMember(Long memberId) {
         UserEntity userEntity = userRepository.findById(memberId)
-                .orElseThrow(() -> new BadRequestException("Member not found"));
+                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND,"유저를 찾을 수 없습니다."));
 
         userRepository.delete(userEntity);
     }
 
+    @Transactional(readOnly = true)
     public UserEntity findById(Long id) {
-        UserEntity userEntity = userRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Member not found"));
-
-        return userEntity;
+        return userRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND,"유저를 찾을 수 없습니다."));
     }
 }

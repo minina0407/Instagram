@@ -23,7 +23,7 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public Page<Comment> getCommentsByPostId(Long portfolioId, Pageable pageable) {
-        PortfolioEntity portfolioEntity = portfolioService.getPoseEntityId(portfolioId);
+        PortfolioEntity portfolioEntity = portfolioService.getPortfolioEntityId(portfolioId);
         Page<CommentEntity> commentEntitiesPage = commentRepository.findAllByPortfolio(portfolioEntity, pageable);
         return commentEntitiesPage.map(Comment::fromEntity);
 

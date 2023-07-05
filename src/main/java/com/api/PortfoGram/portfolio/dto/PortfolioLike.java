@@ -9,15 +9,15 @@ import java.io.Serializable;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PostLike implements Serializable {
+public class PortfolioLike implements Serializable {
     private static final long serialVersionUID = 1L;
     private Long id;
-    private Long postId;
+    private Long portfolioId;
     private Long userId;
     @Builder
-    public PostLike(Long id, Long postId, Long userId) {
+    public PortfolioLike(Long id, Long portfolioId, Long userId) {
         this.id = id;
-        this.postId = postId;
+        this.portfolioId = portfolioId;
         this.userId = userId;
     }
 }

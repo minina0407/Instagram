@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -63,6 +64,7 @@ public class TokenService {
         if (!refreshToken.equals(reissue.getRefreshToken())) {
             throw new BadRequestException("Refresh Token 정보가 일치하지 않습니다.");
         }
+
         // 4. 새로운 토큰 생성
         String authorities = authentication.getAuthorities()
                 .stream()
@@ -78,12 +80,10 @@ public class TokenService {
                 .build();
 
         // 5. RefreshToken Redis 업데이트
-        //TODO : TIMEOUT -> PROPERTIES에 등록해둔 값으로 바꾸끼
         redisTemplate.opsForValue()
-                .set(REFRESH_TOKEN_PREFIX + authentication.getName(), tokenInfo.getRefreshToken(), 7, TimeUnit.DAYS);
+                .set(REFRESH_TOKEN_PREFIX + authentication.getName(), tokenInfo.getRefreshToken(), Duration.ofDays(7));
 
         return tokenInfo;
     }
-
 
 }

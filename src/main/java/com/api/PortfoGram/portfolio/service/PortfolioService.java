@@ -31,7 +31,7 @@ public class PortfolioService {
     private final RedisTemplate redisTemplate;
 
     @Transactional
-    public void savePost(String content, List<MultipartFile> imageFiles) {
+    public void savePortfolio(String content, List<MultipartFile> imageFiles) {
         UserEntity user = userService.getMyUserWithAuthorities();
 
         PortfolioEntity portfolioEntity = PortfolioEntity.builder()
@@ -39,7 +39,6 @@ public class PortfolioService {
                 .content(content)
                 .build();
 
-        // 게시물 저장
         PortfolioEntity savedPortfolioEntity = portfolioRepository.save(portfolioEntity);
 
         Images uploadedImages = portfolioImageService.uploadImage(imageFiles);
@@ -53,18 +52,6 @@ public class PortfolioService {
         }
     }
 
-
-    @Transactional
-    public void incrementLikeCount(Long postId) {
-        PortfolioEntity portfolioEntity = portfolioRepository.findById(postId)
-                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND,"Portfolio not found"));
-
-        int currentLikeCount = portfolioEntity.getLikeCount();
-        int updatedLikeCount = currentLikeCount + 1;
-        portfolioEntity.setLikeCount(updatedLikeCount);
-
-        portfolioRepository.save(portfolioEntity);
-    }
     @Transactional
     public List<Portfolio> getFollowedPortfolios(Long userId) {
         String redisKey = "user:" + userId + ":followedPortfolios";
@@ -87,23 +74,25 @@ public class PortfolioService {
                 .collect(Collectors.toList());
 
         if (!followedPortfolios.isEmpty()) {
-            Set<String> updatedPortfolioIds = followedPortfolios.stream()
-                    .map(portfolioDto -> String.valueOf(portfolioDto.getId()))
-                    .collect(Collectors.toSet());
-
-            redisTemplate.opsForSet().add(redisKey, updatedPortfolioIds.toArray(new String[0]));
+            updateFollowedPortfoliosInRedis( followedPortfolios, redisKey);
         }
 
         return followedPortfolios;
     }
+    public void updateFollowedPortfoliosInRedis(List<Portfolio> followedPortfolios, String redisKey) {
+        Set<String> updatedPortfolioIds = followedPortfolios.stream()
+                .map(portfolioDto -> String.valueOf(portfolioDto.getId()))
+                .collect(Collectors.toSet());
 
+        redisTemplate.opsForSet().add(redisKey, updatedPortfolioIds.toArray(new String[0]));
+    }
     @Transactional(readOnly = true)
-    public Portfolio getPostById(Long feedId) {
-        String redisKey = "portfolio:" + feedId;
+    public Portfolio getPortfolioById(Long portfolioId) {
+        String redisKey = "portfolio:" + portfolioId;
         Portfolio portfolio = (Portfolio) redisTemplate.opsForValue().get(redisKey);
 
         if (portfolio == null) {
-            PortfolioEntity portfolioEntity = portfolioRepository.findPostById(feedId)
+            PortfolioEntity portfolioEntity = portfolioRepository.findPostById(portfolioId)
                     .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "피드를 찾을 수 없습니다."));
             List<PortfolioImage> portfolioImage = portfolioEntity.getPortfolioImages()
                     .stream()
@@ -124,18 +113,18 @@ public class PortfolioService {
     }
 
     @Transactional(readOnly = true)
-    public PortfolioEntity getPoseEntityId(Long postId) {
+    public PortfolioEntity getPortfolioEntityId(Long postId) {
         return portfolioRepository.findById(postId)
-                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "포트폴리오를  찾을 수 없습니다."));
 
     }
 
     @Transactional(readOnly = true)
-    public List<Portfolio> getAllPosts() {
+    public List<Portfolio> getAllPortfolios() {
         List<PortfolioEntity> postsEntity = portfolioRepository.findAll();
 
         if (postsEntity.isEmpty()) {
-            throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "게시글이 없습니다.");
+            throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "포트폴리오가 없습니다.");
         }
 
         List<Portfolio> portfolios = postsEntity.stream()
@@ -146,9 +135,9 @@ public class PortfolioService {
     }
 
     @Transactional
-    public void updatePost(Long id, Portfolio portfolioRequest) {
+    public void updatePortfolio(Long id, Portfolio portfolioRequest) {
         PortfolioEntity portfolioEntity = portfolioRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "포트폴리오를 찾을 수 없습니다."));
 
         portfolioEntity.updateContent(portfolioRequest.getContent()); // 게시글 내용 업데이트
 
@@ -157,9 +146,9 @@ public class PortfolioService {
     }
 
     @Transactional
-    public void deletePost(Long id) {
+    public void deletePortfolio(Long id) {
         PortfolioEntity portfolioEntity = portfolioRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "프토폴리오를 찾을 수 없습니다."));
 
         portfolioRepository.delete(portfolioEntity);
     }
