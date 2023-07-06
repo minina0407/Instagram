@@ -1,5 +1,7 @@
 package com.api.PortfoGram.chat.service;
 
+import com.api.PortfoGram.chat.dto.ChatMessage;
+import com.api.PortfoGram.chat.dto.RabbitPublisher;
 import com.api.PortfoGram.chat.entity.ChatRoomEntity;
 import com.api.PortfoGram.chat.entity.UserChatRoomEntity;
 import com.api.PortfoGram.chat.repository.ChatRoomRepository;
@@ -8,8 +10,6 @@ import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -20,10 +20,7 @@ import java.util.Optional;
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserChatRoomRepository userChatRoomRepository;
-    private final RabbitTemplate rabbitTemplate;
-    public static final String CHAT_ROOM_EXCHANGE = "chat.room.exchange";
-    public static final String CHAT_ROOM_JOIN = "chat.room.join";
-    public static final String CHAT_ROOM_CREATE = "chat.room.create";
+    private final RabbitPublisher rabbitPublisher;
 
     @Transactional
     public Long createNewChatRoom(UserEntity sender, UserEntity receiver) {
@@ -48,8 +45,8 @@ public class ChatRoomService {
                 .build();
         userChatRoomRepository.save(receiverUserChatRoom);
 
-        // RabbitMQ를 통해 채팅방 생성 메시지를 전송
-        rabbitTemplate.convertAndSend(CHAT_ROOM_EXCHANGE , CHAT_ROOM_CREATE, chatRoom.getId());
+        // RabbitPublisher를 통해 채팅방 생성 메시지를 전송
+        rabbitPublisher.publishChatRoomCreateEvent(chatRoom.getId());
 
         return chatRoom.getId();
     }
@@ -65,20 +62,35 @@ public class ChatRoomService {
                 .build();
         userChatRoomRepository.save(userChatRoom);
 
-        // RabbitMQ를 통해 채팅방 입장 메시지를 전송
-        rabbitTemplate.convertAndSend(CHAT_ROOM_EXCHANGE , CHAT_ROOM_JOIN , roomId);
+        // RabbitPublisher를 통해 채팅방 입장 메시지를 전송
+        rabbitPublisher.publishChatRoomJoinEvent(roomId);
+    }
+
+    public void publishJoinMessage(Long roomId, UserEntity user) {
+        // Create a new ChatMessage object
+        ChatMessage chatMessage = ChatMessage.builder()
+                .chatRoomId(roomId)
+                .sender(user.getNickname())
+                .messageType(ChatMessage.MessageType.JOIN)
+                .content(user.getNickname() + " has joined the chat.")
+                .build();
+
+        // Publish the chat message
+        rabbitPublisher.pubsubMessage(chatMessage);
     }
 
     public ChatRoomEntity getChatRoomById(Long roomId) {
         return chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND,"채팅방을 찾을 수 없습니다"));
     }
+
     private void validateParameters(UserEntity sender, UserEntity receiver) {
         if (sender == null || receiver == null) {
             throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID);
         }
 
-        Optional<ChatRoomEntity> existingChatRoom = chatRoomRepository.findBySenderIdAndReceiverId(sender.getId(), receiver.getId());
+        Optional<ChatRoomEntity> existingChatRoom =
+                chatRoomRepository.findBySenderIdAndReceiverId(sender.getId(), receiver.getId());
         if (existingChatRoom.isPresent()) {
             throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID,"이미 존재하는 채팅방입니다.");
         }

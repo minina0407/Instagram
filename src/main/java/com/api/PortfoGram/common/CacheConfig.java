@@ -1,4 +1,4 @@
-package common;
+package com.api.PortfoGram.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -25,11 +25,12 @@ import java.time.Duration;
 @Configuration
 public class CacheConfig {
 
-    @org.springframework.beans.factory.annotation.Value("${spring.redis.host}")
-    private int redisPort;
 
-    @org.springframework.beans.factory.annotation.Value("${spring.redis.port}")
+    @Value("${spring.redis.host}")
     private String redisHost;
+
+    @Value("${spring.redis.port}")
+    private int redisPort;
 
 
     @Bean(name = "redisCacheConnectionFactory")
