@@ -17,19 +17,28 @@ public class ChatMessage implements Serializable {
     private Long id;
 
     private Long senderId;
+    private String sender;
+    private MessageType messageType;
     private Long receiverId;
     private String content;
     private LocalDateTime createdAt;
     private Long chatRoomId;
     @Builder
-    public ChatMessage(Long id, Long senderId,Long receiverId, String content, LocalDateTime createdAt, Long chatRoomId) {
+    public ChatMessage(Long id, Long senderId, String sender, MessageType messageType, Long receiverId, String content, LocalDateTime createdAt, Long chatRoomId) {
         this.id = id;
         this.senderId = senderId;
+        this.sender = sender;
+        this.messageType = messageType;
         this.receiverId = receiverId;
         this.content = content;
         this.createdAt = createdAt;
-        this.chatRoomId =chatRoomId;
+        this.chatRoomId = chatRoomId;
     }
+
+    public enum MessageType {
+        JOIN, MESSAGE;
+    }
+
     public ChatMessage toEntity(ChatMessageEntity chatMessageEntity){
         return ChatMessage.builder()
                 .id(chatMessageEntity.getId())
@@ -49,6 +58,9 @@ public class ChatMessage implements Serializable {
                 .createdAt(chatMessageEntity.getCreatedAt())
                 .chatRoomId(chatMessageEntity.getChatRoom().getId())
                 .build();
+    }
+    public void setSenderId(Long senderId){
+        this.senderId = senderId;
     }
     // Getter and Setter methods
 }

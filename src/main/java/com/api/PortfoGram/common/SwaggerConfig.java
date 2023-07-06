@@ -1,4 +1,4 @@
-package common;// Java
+package com.api.PortfoGram.common;// Java
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
