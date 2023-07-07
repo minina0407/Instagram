@@ -53,7 +53,7 @@ public class ChatController {
         if (receiver == null) {
             throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "유효하지 않은 사용자입니다.");
         }
-        Long chatRoomId = chatRoomService.createNewChatRoom(sender, receiver);
+        chatRoomService.createNewChatRoom(sender, receiver);
         rabbitPublisher.pubsubMessage(chatMessage);
     }
 
