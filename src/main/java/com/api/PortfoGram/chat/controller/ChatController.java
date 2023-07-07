@@ -54,7 +54,6 @@ public class ChatController {
             throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "유효하지 않은 사용자입니다.");
         }
         chatRoomService.createNewChatRoom(sender, receiver);
-        rabbitPublisher.pubsubMessage(chatMessage);
     }
 
     @PostMapping("/rooms/{roomId}/join")
