@@ -1,4 +1,4 @@
-package com.api.PortfoGram.common;// WebSocketConfig.java
+package com.api.PortfoGram.config;// WebSocketConfig.java
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

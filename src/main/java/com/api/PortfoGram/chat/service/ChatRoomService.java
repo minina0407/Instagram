@@ -1,7 +1,5 @@
 package com.api.PortfoGram.chat.service;
 
-import com.api.PortfoGram.chat.dto.ChatMessage;
-import com.api.PortfoGram.chat.dto.RabbitPublisher;
 import com.api.PortfoGram.chat.entity.ChatRoomEntity;
 import com.api.PortfoGram.chat.entity.UserChatRoomEntity;
 import com.api.PortfoGram.chat.repository.ChatRoomRepository;
@@ -13,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -20,7 +19,6 @@ import java.util.Optional;
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserChatRoomRepository userChatRoomRepository;
-    private final RabbitPublisher rabbitPublisher;
 
     @Transactional
     public Long createNewChatRoom(UserEntity sender, UserEntity receiver) {
@@ -29,6 +27,7 @@ public class ChatRoomService {
         ChatRoomEntity chatRoom = ChatRoomEntity.builder()
                 .senderId(sender.getId())
                 .receiverId(receiver.getId())
+                .createdAt(LocalDateTime.now())
                 .build();
         chatRoomRepository.save(chatRoom);
 
@@ -45,9 +44,6 @@ public class ChatRoomService {
                 .build();
         userChatRoomRepository.save(receiverUserChatRoom);
 
-        // RabbitPublisher를 통해 채팅방 생성 메시지를 전송
-        rabbitPublisher.publishChatRoomCreateEvent(chatRoom.getId());
-
         return chatRoom.getId();
     }
 
@@ -62,21 +58,6 @@ public class ChatRoomService {
                 .build();
         userChatRoomRepository.save(userChatRoom);
 
-        // RabbitPublisher를 통해 채팅방 입장 메시지를 전송
-        rabbitPublisher.publishChatRoomJoinEvent(roomId);
-    }
-
-    public void publishJoinMessage(Long roomId, UserEntity user) {
-        // Create a new ChatMessage object
-        ChatMessage chatMessage = ChatMessage.builder()
-                .chatRoomId(roomId)
-                .sender(user.getNickname())
-                .messageType(ChatMessage.MessageType.JOIN)
-                .content(user.getNickname() + " has joined the chat.")
-                .build();
-
-        // Publish the chat message
-        rabbitPublisher.pubsubMessage(chatMessage);
     }
 
     public ChatRoomEntity getChatRoomById(Long roomId) {

@@ -1,7 +1,6 @@
 package com.api.PortfoGram.chat.controller;
 
 import com.api.PortfoGram.chat.dto.ChatMessage;
-import com.api.PortfoGram.chat.dto.RabbitPublisher;
 
 import com.api.PortfoGram.chat.service.ChatMessageService;
 import com.api.PortfoGram.chat.service.ChatRoomService;
@@ -9,36 +8,37 @@ import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
 import com.api.PortfoGram.user.entity.UserEntity;
 import com.api.PortfoGram.user.service.UserService;
-import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.tags.Tags;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.api.PortfoGram.chat.constant.RabbitMQConstant.CHAT_QUEUE_NAME;
+import static com.api.PortfoGram.chat.constant.RabbitMQConstant.EXCHANGE_NAME;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/chat")
 @Tag(name = "채팅 API", description = "채팅 관련 API")
+
+@Slf4j
 public class ChatController {
     private final ChatRoomService chatRoomService;
    private final ChatMessageService chatMessageService;
     private final UserService userService;
     private final RabbitTemplate rabbitTemplate;
-    private final RabbitPublisher rabbitPublisher;
     @PostMapping("/rooms")
     @Operation(summary = "채팅방 생성", description = "채팅방을 생성합니다.")
     @ApiResponses(value = {
@@ -68,9 +68,6 @@ public class ChatController {
     public void joinChatRoom(@PathVariable Long roomId) {
         UserEntity user = userService.getMyUserWithAuthorities();
         chatRoomService.joinChatRoom(roomId, user);
-
-        // Call the publishJoinMessage() method of the ChatRoomService
-        chatRoomService.publishJoinMessage(roomId, user);
     }
 
 
@@ -92,9 +89,16 @@ public class ChatController {
             throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "채팅방이 존재하지 않습니다.");
         }
         UserEntity sender = userService.getMyUserWithAuthorities();
-        chatMessage.setSenderId(sender.getId());
+        log.info("chatRoomId = {}", roomId);
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "chat."+roomId, chatMessage);
+
         chatMessageService.saveChatMessage(sender, chatMessage.getContent(), roomId);
-       rabbitPublisher.pubsubMessage(chatMessage);
+    }
+
+    @RabbitListener(queues = CHAT_QUEUE_NAME) // 메세지가 큐에
+    public void receive(ChatMessage chatMessage){
+        log.info("message.get={}",chatMessage.getContent());
+        // TODO : reids에 메세지 저장 하기 ( Batch 이용하기 )
     }
 
     @ApiResponses(value = {
@@ -111,4 +115,5 @@ public class ChatController {
         }
         return chatMessageService.getLastMessages(roomId);
     }
+    // TODO : 최근 20개 불러오는 API 에서 레디스에서 읽어오기
 }

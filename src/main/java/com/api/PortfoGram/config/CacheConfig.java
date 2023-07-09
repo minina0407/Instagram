@@ -1,4 +1,4 @@
-package com.api.PortfoGram.common;
+package com.api.PortfoGram.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
