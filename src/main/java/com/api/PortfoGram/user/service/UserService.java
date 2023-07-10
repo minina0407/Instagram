@@ -12,6 +12,7 @@ import com.api.PortfoGram.user.dto.Profile;
 import com.api.PortfoGram.user.dto.User;
 import com.api.PortfoGram.user.entity.FollowEntity;
 import com.api.PortfoGram.user.entity.UserEntity;
+import com.api.PortfoGram.user.repository.FollowRepository;
 import com.api.PortfoGram.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,6 +29,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RedisTemplate<String, String> redisTemplate;
+    private final FollowRepository followRepository;
 
     @Transactional(readOnly = true)
     public Profile searchProfileById(Long userId) {
@@ -65,7 +67,7 @@ public class UserService {
             return followerIds.stream().map(Long::parseLong).collect(Collectors.toSet());
         } else {
             // 기존 저장소에서 팔로워 목록을 가져오고 Redis에 갱신하는 로직 추가
-            Set<Long> followers = userRepository.findFollowerIdsById(userId);
+            Set<Long> followers = followRepository.findFollowerIdsById(userId);
             if (followers != null && !followers.isEmpty()) {
                 redisTemplate.opsForSet().add(redisKey, Arrays.toString(followers.toArray()));
             }
@@ -94,38 +96,6 @@ public class UserService {
     }
 
 
-
-    @Transactional
-    public void followUser(Long followingId) {
-        UserEntity user = getMyUserWithAuthorities();
-        UserEntity followUser = findById(followingId);
-
-        // 중복 팔로우 체크
-        boolean alreadyFollowing = user.getFollowings().stream()
-                .anyMatch(followEntity -> followEntity.getFollowing().getId().equals(followingId));
-
-        if (!alreadyFollowing) {
-            FollowEntity followEntity = FollowEntity.builder()
-                    .follower(user)
-                    .following(followUser)
-                    .build();
-            user.getFollowings().add(followEntity);
-            userRepository.save(user);
-        }
-    }
-
-    @Transactional
-    public void unfollowUser(Long userId, Long followingId) {
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Optional<FollowEntity> existingFollow = user.getFollowings().stream()
-                .filter(followEntity -> followEntity.getFollowing().getId().equals(followingId))
-                .findFirst();
-
-        if (existingFollow.isPresent()) {
-            user.getFollowings().remove(existingFollow.get());
-            userRepository.save(user);
-        }
-    }
 
     private String getRedisKey(Long userId) {
         return "user:" + userId + ":followedPortfolios";

@@ -3,6 +3,7 @@ package com.api.PortfoGram.user.controller;
 import com.api.PortfoGram.user.dto.Profile;
 import com.api.PortfoGram.user.dto.User;
 import com.api.PortfoGram.user.entity.UserEntity;
+import com.api.PortfoGram.user.service.FollowService;
 import com.api.PortfoGram.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,6 +26,7 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+    private final FollowService followService;
 
     @GetMapping("/profile")
     @Operation(summary = "프로필 조회", description = "사용자 프로필을 조회합니다.")
@@ -47,7 +49,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "유저 팔로우 성공")
     public ResponseEntity<Void> followUser(@RequestParam("followingId") Long followingId) {
 
-        userService.followUser(followingId);
+        followService.followUser(followingId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -56,7 +58,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "유저 언팔로우 성공")
     public ResponseEntity<Void> unfollowUser(@RequestParam("followingId") Long followingId) {
         UserEntity user = userService.getMyUserWithAuthorities();
-        userService.unfollowUser(user.getId(), followingId);
+        followService.unfollowUser(user.getId(), followingId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

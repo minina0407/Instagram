@@ -12,7 +12,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByEmail(@Param("email") String email);
     boolean existsByEmail(@Param("email") String email);
     boolean existsByNickname(@Param("nickname") String nickname);
-    @Query("SELECT f.follower.id FROM FollowEntity f WHERE f.following.id = :id")
-    Set<Long> findFollowerIdsById(@Param("id") Long userId);
+
 
 }

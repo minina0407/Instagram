@@ -22,6 +22,7 @@ public class FollowEntity {
     @JoinColumn(name = "follower_id", nullable = false)
     private UserEntity follower;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "following_id", nullable = false)
     private UserEntity following;
