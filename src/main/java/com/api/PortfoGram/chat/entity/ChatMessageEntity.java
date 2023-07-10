@@ -1,5 +1,6 @@
 package com.api.PortfoGram.chat.entity;
 
+import com.api.PortfoGram.chat.dto.ChatMessage;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -35,11 +36,22 @@ public class ChatMessageEntity {
     private LocalDateTime createdAt;
 
     @Builder
-    public ChatMessageEntity(ChatRoomEntity chatRoom, Long senderId, Long receiverId, String content, LocalDateTime createdAt) {
+    public ChatMessageEntity(Long id,ChatRoomEntity chatRoom, Long senderId, Long receiverId, String content, LocalDateTime createdAt) {
         this.chatRoom = chatRoom;
+        this.id = id;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.content = content;
         this.createdAt = createdAt;
+    }
+    public ChatMessage toEntity(ChatMessageEntity chatMessageEntity){
+        return ChatMessage.builder()
+                .id(chatMessageEntity.getId())
+                .senderId(chatMessageEntity.getSenderId())
+                .receiverId(chatMessageEntity.getReceiverId())
+                .content(chatMessageEntity.getContent())
+                .createdAt(chatMessageEntity.getCreatedAt())
+                .chatRoomId(chatMessageEntity.getChatRoom().getId())
+                .build();
     }
 }

@@ -9,6 +9,7 @@ import com.api.PortfoGram.portfolio.service.PortfolioLikeService;
 
 import javax.validation.Valid;
 
+import com.api.PortfoGram.user.entity.UserEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -50,23 +51,12 @@ public class PortfolioController {
         Portfolio portfolio = portfolioService.getPortfolioById(portfolioId);
         return new ResponseEntity<>(portfolio, HttpStatus.OK);
     }
-
     @GetMapping
     @Operation(summary = "모든 포트폴리오 조회", description = "모든 포트폴리오를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "포트폴리오 목록 조회 성공")
     public ResponseEntity<List<Portfolio>> getAllPortfolios() {
         List<Portfolio> portfolios = portfolioService.getAllPortfolios();
         return new ResponseEntity<>(portfolios, HttpStatus.OK);
-    }
-
-    @GetMapping("/following/{userId}")
-    @Operation(summary = "팔로잉 중인 포트폴리오 조회", description = "특정 사용자가 팔로잉 중인 포트폴리오를 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "팔로잉 중인 포트폴리오 목록 조회 성공")
-    public ResponseEntity<List<Portfolio>> getFollowedPortfolios(
-            @PathVariable("userId") Long userId
-    ) {
-        List<Portfolio> followedPortfolios = portfolioService.getFollowedPortfolios(userId);
-        return new ResponseEntity<>(followedPortfolios,HttpStatus.OK);
     }
 
     @GetMapping("/{portfolioId}/comments")
@@ -101,8 +91,8 @@ public class PortfolioController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
     @GetMapping("/latest")
-    public ResponseEntity<List<Portfolio>> getLatestPortfolios(@PathVariable Long userId) {
-        List<Portfolio> latestPortfolios = portfolioService.getLatestPortfolios(userId);
+    public ResponseEntity<List<Portfolio>> getLatestPortfolios() {
+        List<Portfolio> latestPortfolios = portfolioService.getLatestPortfolios();
         return new ResponseEntity<>(latestPortfolios, HttpStatus.OK);
     }
 

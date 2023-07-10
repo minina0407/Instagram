@@ -1,6 +1,7 @@
 package com.api.PortfoGram.chat.dto;
 
 import com.api.PortfoGram.chat.entity.ChatMessageEntity;
+import com.api.PortfoGram.chat.entity.ChatRoomEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,14 +40,14 @@ public class ChatMessage implements Serializable {
         JOIN, MESSAGE;
     }
 
-    public ChatMessage toEntity(ChatMessageEntity chatMessageEntity){
-        return ChatMessage.builder()
-                .id(chatMessageEntity.getId())
-                .senderId(chatMessageEntity.getSenderId())
-                .receiverId(chatMessageEntity.getReceiverId())
-                .content(chatMessageEntity.getContent())
-                .createdAt(chatMessageEntity.getCreatedAt())
-                .chatRoomId(chatMessageEntity.getChatRoom().getId())
+    public ChatMessageEntity toEntity() {
+        return ChatMessageEntity.builder()
+                .id(this.id)
+                .senderId(this.senderId)
+                .receiverId(this.receiverId)
+                .content(this.content)
+                .createdAt(this.createdAt)
+                .chatRoom(ChatRoomEntity.builder().id(this.chatRoomId).build())
                 .build();
     }
     public static ChatMessage fromEntity(ChatMessageEntity chatMessageEntity) {

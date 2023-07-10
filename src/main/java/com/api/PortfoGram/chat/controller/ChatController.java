@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
@@ -32,13 +33,13 @@ import static com.api.PortfoGram.chat.constant.RabbitMQConstant.EXCHANGE_NAME;
 @RequiredArgsConstructor
 @RequestMapping("/api/chat")
 @Tag(name = "채팅 API", description = "채팅 관련 API")
-
 @Slf4j
 public class ChatController {
     private final ChatRoomService chatRoomService;
    private final ChatMessageService chatMessageService;
     private final UserService userService;
     private final RabbitTemplate rabbitTemplate;
+    private final RedisTemplate redisTemplate;
     @PostMapping("/rooms")
     @Operation(summary = "채팅방 생성", description = "채팅방을 생성합니다.")
     @ApiResponses(value = {
@@ -90,7 +91,7 @@ public class ChatController {
         }
         UserEntity sender = userService.getMyUserWithAuthorities();
         log.info("chatRoomId = {}", roomId);
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "chat."+roomId, chatMessage);
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "chat." + roomId, chatMessage.toEntity());
 
         chatMessageService.saveChatMessage(sender, chatMessage.getContent(), roomId);
     }
@@ -98,7 +99,7 @@ public class ChatController {
     @RabbitListener(queues = CHAT_QUEUE_NAME) // 메세지가 큐에
     public void receive(ChatMessage chatMessage){
         log.info("message.get={}",chatMessage.getContent());
-        // TODO : reids에 메세지 저장 하기 ( Batch 이용하기 )
+        chatMessageService.saveChatMessageToRedis(chatMessage);
     }
 
     @ApiResponses(value = {
@@ -115,5 +116,6 @@ public class ChatController {
         }
         return chatMessageService.getLastMessages(roomId);
     }
+
     // TODO : 최근 20개 불러오는 API 에서 레디스에서 읽어오기
 }

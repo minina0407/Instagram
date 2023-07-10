@@ -6,10 +6,13 @@ import com.api.PortfoGram.chat.entity.ChatRoomEntity;
 import com.api.PortfoGram.chat.repository.ChatMessageRepository;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +21,7 @@ import java.util.stream.Collectors;
 public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomService chatRoomService;
+    private final RedisTemplate redisTemplate;
 
     @Transactional
     public void saveChatMessage(UserEntity sender, String content, Long receiverId) {
@@ -31,12 +35,37 @@ public class ChatMessageService {
                 .build();
         chatMessageRepository.save(chatMessage);
     }
-
-    public List<ChatMessage> getLastMessages(Long roomId) {
-        ChatRoomEntity chatRoom = chatRoomService.getChatRoomById(roomId);
-        List<ChatMessageEntity> chatMessageEntities = chatMessageRepository.findTop20ByChatRoomOrderByCreatedAtDesc(chatRoom);
-        return chatMessageEntities.stream()
-                .map(ChatMessage::fromEntity)
-                .collect(Collectors.toList());
+    public void saveChatMessageToRedis(ChatMessage chatMessage) {
+        // Redis에 메시지 저장
+        String redisKey = "chatMessages:" + chatMessage.getChatRoomId();
+        redisTemplate.opsForList().leftPush(redisKey, chatMessage);
     }
+    public List<ChatMessage> getLastMessages(Long roomId) {
+        String redisKey = "chatMessages:" + roomId;
+        List<ChatMessage> chatMessages = redisTemplate.opsForList().range(redisKey, 0, 19);
+
+        if (chatMessages != null && !chatMessages.isEmpty()) {
+            return chatMessages;
+        } else {
+            syncChatMessagesToDB(roomId);
+            chatMessages = redisTemplate.opsForList().range(redisKey, 0, 19);
+
+            return chatMessages != null ? chatMessages : new ArrayList<>();
+        }
+    }
+    @Scheduled(cron = "0/60 * * * * *") // 분 단위로 실행
+    public void syncChatMessagesToDB(Long roomId) {
+        String redisKey = "chatMessages:" + roomId;
+        List<ChatMessage> chatMessages = redisTemplate.opsForList().range(redisKey, 0, 19);
+
+        if (!chatMessages.isEmpty()) {
+            List<ChatMessageEntity> newChatMessages = chatMessages.stream()
+                    .map(ChatMessage::toEntity)
+                    .collect(Collectors.toList());
+
+            chatMessageRepository.saveAll(newChatMessages);
+            redisTemplate.opsForList().trim(redisKey, 0, 19);
+        }
+    }
+
 }

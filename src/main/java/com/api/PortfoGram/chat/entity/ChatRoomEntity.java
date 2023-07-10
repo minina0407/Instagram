@@ -36,13 +36,16 @@ public class ChatRoomEntity {
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
     private List<ChatMessageEntity> chatMessages = new ArrayList<>();
-
     @Builder
-    public ChatRoomEntity(Long senderId, Long receiverId, LocalDateTime createdAt) {
+    public ChatRoomEntity(Long id, Long senderId, Long receiverId, LocalDateTime createdAt, List<UserChatRoomEntity> userChatRooms, List<ChatMessageEntity> chatMessages) {
+        this.id = id;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.createdAt = createdAt;
+        this.userChatRooms = userChatRooms;
+        this.chatMessages = chatMessages;
     }
+
     public void addChatMessage(ChatMessageEntity chatMessage) {
         chatMessages.add(chatMessage);
     }
