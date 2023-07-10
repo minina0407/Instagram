@@ -46,8 +46,8 @@ public class UserController {
     @Operation(summary = "유저 팔로우", description = "다른 사용자를 팔로우합니다.")
     @ApiResponse(responseCode = "200", description = "유저 팔로우 성공")
     public ResponseEntity<Void> followUser(@RequestParam("followingId") Long followingId) {
-        UserEntity user = userService.getMyUserWithAuthorities();
-        userService.followUser(user.getId(), followingId);
+
+        userService.followUser(followingId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

@@ -66,7 +66,7 @@ public class PortfolioController {
             @PathVariable("userId") Long userId
     ) {
         List<Portfolio> followedPortfolios = portfolioService.getFollowedPortfolios(userId);
-        return ResponseEntity.ok(followedPortfolios);
+        return new ResponseEntity<>(followedPortfolios,HttpStatus.OK);
     }
 
     @GetMapping("/{portfolioId}/comments")
@@ -99,6 +99,11 @@ public class PortfolioController {
     ) {
         portfolioLikeService.likePortfolio(portfolioId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @GetMapping("/latest")
+    public ResponseEntity<List<Portfolio>> getLatestPortfolios(@PathVariable Long userId) {
+        List<Portfolio> latestPortfolios = portfolioService.getLatestPortfolios(userId);
+        return new ResponseEntity<>(latestPortfolios, HttpStatus.OK);
     }
 
     @PutMapping("/{portfolioId}")

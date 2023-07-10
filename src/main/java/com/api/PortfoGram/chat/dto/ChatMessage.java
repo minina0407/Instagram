@@ -59,8 +59,4 @@ public class ChatMessage implements Serializable {
                 .chatRoomId(chatMessageEntity.getChatRoom().getId())
                 .build();
     }
-    public void setSenderId(Long senderId){
-        this.senderId = senderId;
-    }
-    // Getter and Setter methods
 }

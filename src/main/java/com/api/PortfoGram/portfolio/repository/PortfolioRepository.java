@@ -18,4 +18,13 @@ public interface PortfolioRepository extends JpaRepository<PortfolioEntity, Long
             "INNER JOIN u.followings fu " +
             "WHERE fu.id = :userId")
     List<PortfolioEntity> findFollowedPortfolios(@Param("userId") Long userId);
+
+    @Query("SELECT p FROM PortfolioEntity p WHERE p.id IN (:portfolioIds) ORDER BY p.createdAt DESC")
+    List<PortfolioEntity> findByIdInOrderByCreatedAtDesc(@Param("portfolioIds") List<Long> portfolioIds);
+
+
+    @Query("SELECT p FROM PortfolioEntity p WHERE p.user.id = :userId ORDER BY p.createdAt DESC")
+    List<PortfolioEntity> findLatestPortfoliosByUserId(@Param("userId") Long userId);
+
 }
+

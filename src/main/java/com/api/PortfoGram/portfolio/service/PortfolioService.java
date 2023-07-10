@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,6 +42,11 @@ public class PortfolioService {
                 .build();
 
         PortfolioEntity savedPortfolioEntity = portfolioRepository.save(portfolioEntity);
+        // 팔로워들의 타임라인에 기록
+        Set<Long> followers = userService.getFollowers(user.getId()); // add getFollowers() method
+        for (Long followerId : followers) {
+            updateLatestPortfoliosInRedis(portfolioEntity, "user:" + followerId + ":portfolios");
+        }
 
         Images uploadedImages = portfolioImageService.uploadImage(imageFiles);
         List<Image> imageList = uploadedImages.getImages();
@@ -52,27 +59,58 @@ public class PortfolioService {
         }
     }
 
+    public List<Portfolio> getLatestPortfolios(Long userId) {
+        String redisKey = "user:" + userId + ":portfolios";
+        List<String> portfolioIds = redisTemplate.opsForList().range(redisKey, 0, -1);
+
+        if (portfolioIds != null && !portfolioIds.isEmpty()) {
+            List<Long> portfolioIdsLong = portfolioIds.stream().map(Long::parseLong).collect(Collectors.toList());
+
+           List<PortfolioEntity> portfolioEntities = portfolioRepository.findByIdInOrderByCreatedAtDesc(portfolioIdsLong);
+            return portfolioEntities.stream().map(Portfolio::fromEntity).collect(Collectors.toList());
+        } else {
+            // 기존 저장소에서 마지막 수록된 포트폴리오 가져오고 Redis에 갱신하는 로직 추가
+            List<PortfolioEntity> latestPortfolios = portfolioRepository.findLatestPortfoliosByUserId(userId);
+            if (latestPortfolios != null && !latestPortfolios.isEmpty()) {
+                List<Long> portfolioIdsLong = latestPortfolios.stream().map(PortfolioEntity::getId).collect(Collectors.toList());
+                redisTemplate.opsForList().rightPushAll(redisKey, portfolioIdsLong.toArray());
+                return latestPortfolios.stream().map(Portfolio::fromEntity).collect(Collectors.toList());
+            }
+        }
+        return new ArrayList<>();
+    }
+
+
+    public void updateLatestPortfoliosInRedis(PortfolioEntity portfolioEntity, String redisKey) {
+        String portfolioIdStr = String.valueOf(portfolioEntity.getId());
+        redisTemplate.opsForList().leftPush(redisKey, portfolioIdStr);
+    }
+
     @Transactional
     public List<Portfolio> getFollowedPortfolios(Long userId) {
+        // Redis key를 생성합니다.
         String redisKey = "user:" + userId + ":followedPortfolios";
+        // Redis에서 팔로우한 포트폴리오 ID 목록을 조회합니다.
         Set<String> followedPortfolioIds = redisTemplate.opsForSet().members(redisKey);
-
+        // Redis에 팔로우한 포트폴리오 ID 목록이 있는 경우
         if (followedPortfolioIds != null && !followedPortfolioIds.isEmpty()) {
+            // 포트폴리오 ID 목록을 Long 타입으로 변환
             List<Long> portfolioIds = followedPortfolioIds.stream()
                     .map(Long::parseLong)
                     .collect(Collectors.toList());
-
+            // Repository에서 팔로우한 포트폴리오 엔티티 목록을 조회
             List<PortfolioEntity> followedPortfolioEntities = portfolioRepository.findAllById(portfolioIds);
+            // 엔티티를 DTO로 변환하여 반환
             return followedPortfolioEntities.stream()
                     .map(Portfolio::fromEntity)
                     .collect(Collectors.toList());
         }
-
+        // Redis에 팔로우한 포트폴리오 ID 목록이 없는 경우
         List<PortfolioEntity> followedPortfolioEntities = portfolioRepository.findFollowedPortfolios(userId);
         List<Portfolio> followedPortfolios = followedPortfolioEntities.stream()
                 .map(Portfolio::fromEntity)
                 .collect(Collectors.toList());
-
+        // 조회한 팔로우한 포트폴리오 목록이 비어있지 않으면 Redis에 업데이트
         if (!followedPortfolios.isEmpty()) {
             updateFollowedPortfoliosInRedis( followedPortfolios, redisKey);
         }
