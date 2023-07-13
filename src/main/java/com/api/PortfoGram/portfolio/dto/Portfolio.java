@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Portfolio implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 12423L;
     private Long id;
     private Long userId;
     @NotBlank(message = "내용이 없습니다.")
