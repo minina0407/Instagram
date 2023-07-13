@@ -1,12 +1,7 @@
 package common;
 
-import com.api.PortfoGram.portfolio.dto.Portfolio;
-import com.api.PortfoGram.user.dto.User;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
@@ -18,7 +13,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -35,19 +29,23 @@ public class RedisConfig {
     @Value("${spring.redis.host}")
     private String redisHost;
 
+    @Value("${spring.redis.password}")
+    private String redisPassword;
+
+
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(
-                new RedisStandaloneConfiguration(redisHost, redisPort)
-        );
+        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(redisHost, redisPort);
+        redisConfig.setPassword(redisPassword);
+        return new LettuceConnectionFactory(redisConfig);
     }
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(fromSerializer(new Jackson2JsonRedisSerializer<>(Portfolio.class)))
+                .serializeValuesWith(fromSerializer(new Jackson2JsonRedisSerializer<>(Object.class)))
                 .entryTtl(Duration.ofMinutes(3L)); //임시 설정값
 
         return RedisCacheManager.RedisCacheManagerBuilder
@@ -73,29 +71,30 @@ public class RedisConfig {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
-        // Key Serializer 구성
+        // Key Serializer configuration
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
 
-        // Value Serializer 구성
-        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        // Value Serializer configuration
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
+        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
 
         return redisTemplate;
     }
+
     @Bean
-    public RedisTemplate<String, String> stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
+    public RedisTemplate<String, String> StringredisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, String> StringredisTemplate = new RedisTemplate<>();
+        StringredisTemplate.setConnectionFactory(redisConnectionFactory);
 
-        // Key Serializer 구성
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        // Key Serializer configuration
+        StringredisTemplate.setKeySerializer(new StringRedisSerializer());
+        StringredisTemplate.setHashKeySerializer(new StringRedisSerializer());
 
-        // Value Serializer 구성
-        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        // Value Serializer configuration
+        StringredisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
+        StringredisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
 
-        return redisTemplate;
+        return StringredisTemplate;
     }
 }

@@ -14,7 +14,9 @@ import com.api.PortfoGram.user.entity.UserEntity;
 import com.api.PortfoGram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,7 @@ public class PortfolioService {
     private final UserService userService;
     private final PortfolioImageService portfolioImageService;
     private final RedisTemplate redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
     @Transactional
     public void savePortfolio(String content, List<MultipartFile> imageFiles) {
         UserEntity user = userService.getMyUserWithAuthorities();
@@ -52,27 +55,27 @@ public class PortfolioService {
                     .build();
             savedPortfolioEntity.addImage(portfolioImageEntity);
         }
-        cacheLatestPortfolioForUser(user, savedPortfolioEntity.getId());
 
-        // 수정된 부분: user.getFollowers()를 userEntity에서 user로 변경
+        cacheLatestPortfolioForUser(user.getId().toString(), savedPortfolioEntity.getId());
+
         List<Long> followerIds = user.getFollowerIds();
-        cacheNewPortfolioForFollowers(savedPortfolioEntity.getId(), followerIds, savedPortfolioEntity.getCreatedAt().getTime());   }
-    private void cacheLatestPortfolioForUser(UserEntity user, Long portfolioId) {
-        String redisKey = "user:" + user.getId() + ":portfolios";
+        cacheNewPortfolioForFollowers(savedPortfolioEntity.getId().toString(), followerIds, savedPortfolioEntity.getCreatedAt().getTime());   }
+    private void cacheLatestPortfolioForUser(String userId, Long portfolioId) {
+        String redisKey = "user:" + userId+ ":portfolios";
         double timestamp = System.currentTimeMillis();
 
-        redisTemplate.opsForZSet().add(redisKey, String.valueOf(portfolioId), timestamp);
+        stringRedisTemplate.opsForZSet().add(redisKey, portfolioId.toString(), timestamp);
     }
-    private void cacheNewPortfolioForFollowers(Long newPortfolioId, List<Long> followerIds, double timestamp) {
+    private void cacheNewPortfolioForFollowers(String newPortfolioId, List<Long> followerIds, double timestamp) {
         followerIds.forEach(followerId -> {
             String redisKey = "user:" + followerId + ":portfolios";
-            redisTemplate.opsForZSet().add(redisKey, newPortfolioId.toString(), timestamp);
+            stringRedisTemplate.opsForZSet().add(redisKey, newPortfolioId, timestamp);
         });
     }
     public List<Portfolio> getLatestPortfolios() {
         UserEntity userEntity = userService.getMyUserWithAuthorities();
         String redisKey = "user:" + userEntity.getId() + ":portfolios";
-        Set<Object> portfolioIds = redisTemplate.opsForZSet().reverseRange(redisKey, 0, -1);
+        Set<String> portfolioIds = stringRedisTemplate.opsForZSet().reverseRange(redisKey, 0, -1);
 
         if (portfolioIds != null && !portfolioIds.isEmpty()) {
             List<Long> portfolioIdsLong = portfolioIds.stream().map(id -> Long.parseLong(id.toString())).collect(Collectors.toList());
@@ -85,7 +88,10 @@ public class PortfolioService {
                 Map<String, Double> portfolioIdsWithTimestamp = latestPortfolios.stream()
                         .collect(Collectors.toMap(portfolio -> String.valueOf(portfolio.getId()),
                                 portfolio -> (double) portfolio.getCreatedAt().getTime()));
-                redisTemplate.opsForZSet().add(redisKey, (Set<ZSetOperations.TypedTuple<Object>>) portfolioIdsWithTimestamp);
+                stringRedisTemplate.opsForZSet().add(redisKey, portfolioIdsWithTimestamp.entrySet().stream()
+                        .map(entry -> new DefaultTypedTuple<>(entry.getKey(), entry.getValue()))
+                        .collect(Collectors.toSet()));
+
                 return latestPortfolios.stream().map(Portfolio::fromEntity).collect(Collectors.toList());
             }
         }
