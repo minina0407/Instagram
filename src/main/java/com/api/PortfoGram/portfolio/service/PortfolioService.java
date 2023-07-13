@@ -60,12 +60,9 @@ public class PortfolioService {
     }
     private void cacheLatestPortfolioForUser(UserEntity user, Long portfolioId) {
         String redisKey = "user:" + user.getId() + ":portfolios";
-
         // 새로 생성된 포트폴리오 ID를 저장소의 첫 번째 요소로 삽입
         redisTemplate.opsForList().leftPush(redisKey, String.valueOf(portfolioId));
 
-        // 저장소 크기를 제한 (선택 사항)
-        redisTemplate.opsForList().trim(redisKey, 0, 99);
     }
     public void cacheNewPortfolioForFollowers(Long newPortfolioId, List<Long> followerIds) {
         followerIds.forEach(followerId -> {

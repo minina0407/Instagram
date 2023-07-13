@@ -1,5 +1,7 @@
 package common;
 
+import com.api.PortfoGram.portfolio.dto.Portfolio;
+import com.api.PortfoGram.user.dto.User;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,11 +42,12 @@ public class RedisConfig {
                 new RedisStandaloneConfiguration(redisHost, redisPort)
         );
     }
+
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(fromSerializer(genericJackson2JsonRedisSerializer()))
+                .serializeValuesWith(fromSerializer(new Jackson2JsonRedisSerializer<>(Portfolio.class)))
                 .entryTtl(Duration.ofMinutes(3L)); //임시 설정값
 
         return RedisCacheManager.RedisCacheManagerBuilder
@@ -52,13 +55,8 @@ public class RedisConfig {
                 .cacheDefaults(redisCacheConfiguration)
                 .build();
     }
-    @Bean
-    public GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
-        return new GenericJackson2JsonRedisSerializer(objectMapper);
-    }
+
+
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -69,25 +67,22 @@ public class RedisConfig {
 
         return objectMapper;
     }
+
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
+    public RedisTemplate<String, Portfolio> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String,Portfolio> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
 
         // Key Serializer
         template.setKeySerializer(new StringRedisSerializer());
 
-        // Value Serializer
-        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
-        jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
-
-        template.setValueSerializer(jackson2JsonRedisSerializer);
+        // Value Serializer (HashRedisSerializer 사용)
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(Portfolio.class));
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(jackson2JsonRedisSerializer);
+        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(Portfolio.class));
+
 
         return template;
     }
+
 }
