@@ -13,6 +13,7 @@ import com.api.PortfoGram.portfolio.repository.PortfolioRepository;
 import com.api.PortfoGram.user.entity.FollowEntity;
 import com.api.PortfoGram.user.entity.UserEntity;
 import com.api.PortfoGram.user.service.UserService;
+import common.RedisConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,8 @@ public class PortfolioService {
     private final PortfolioRepository portfolioRepository;
     private final UserService userService;
     private final PortfolioImageService portfolioImageService;
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, String> stringRedisTemplate;
     @Transactional
     public void savePortfolio(String content, List<MultipartFile> imageFiles) {
         UserEntity user = userService.getMyUserWithAuthorities();
@@ -61,19 +63,19 @@ public class PortfolioService {
     private void cacheLatestPortfolioForUser(UserEntity user, Long portfolioId) {
         String redisKey = "user:" + user.getId() + ":portfolios";
         // 새로 생성된 포트폴리오 ID를 저장소의 첫 번째 요소로 삽입
-        redisTemplate.opsForList().leftPush(redisKey, String.valueOf(portfolioId));
+        stringRedisTemplate.opsForList().leftPush(redisKey, String.valueOf(portfolioId));
 
     }
     public void cacheNewPortfolioForFollowers(Long newPortfolioId, List<Long> followerIds) {
         followerIds.forEach(followerId -> {
             String redisKey = "user:" + followerId + ":portfolios";
-            redisTemplate.opsForList().rightPush(redisKey, newPortfolioId.toString());
+            stringRedisTemplate.opsForList().rightPush(redisKey, newPortfolioId.toString());
         });
     }
     public List<Portfolio> getLatestPortfolios() {
         UserEntity userEntity = userService.getMyUserWithAuthorities();
         String redisKey = "user:" + userEntity.getId() + ":portfolios";
-        List<String> portfolioIds = redisTemplate.opsForList().range(redisKey, 0, -1);
+        List<String> portfolioIds = stringRedisTemplate.opsForList().range(redisKey, 0, -1);
 
         if (portfolioIds != null && !portfolioIds.isEmpty()) {
             List<Long> portfolioIdsLong = portfolioIds.stream().map(Long::parseLong).collect(Collectors.toList());
