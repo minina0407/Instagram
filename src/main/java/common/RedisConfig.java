@@ -68,21 +68,24 @@ public class RedisConfig {
         return objectMapper;
     }
 
+
     @Bean
-    public RedisTemplate<String, Portfolio> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String,Portfolio> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
+    public RedisTemplate<String, Object> redisTemplate() {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
 
-        // Key Serializer
-        template.setKeySerializer(new StringRedisSerializer());
+        // Value Serializer 구성
+        Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
+        serializer.setObjectMapper(objectMapper);
 
-        // Value Serializer (HashRedisSerializer 사용)
-        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(Portfolio.class));
-        template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(Portfolio.class));
+        redisTemplate.setValueSerializer(serializer);
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(serializer);
 
-
-        return template;
+        return redisTemplate;
     }
-
 }
