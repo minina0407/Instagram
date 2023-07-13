@@ -13,6 +13,7 @@ import com.api.PortfoGram.portfolio.repository.PortfolioRepository;
 import com.api.PortfoGram.user.entity.UserEntity;
 import com.api.PortfoGram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -31,8 +32,7 @@ public class PortfolioService {
     private final PortfolioRepository portfolioRepository;
     private final UserService userService;
     private final PortfolioImageService portfolioImageService;
-    private final RedisTemplate<String, String> stringRedisTemplate;
-    private final RedisTemplate<String,Object> redisTemplate;
+    private final RedisTemplate redisTemplate;
     @Transactional
     public void savePortfolio(String content, List<MultipartFile> imageFiles) {
         UserEntity user = userService.getMyUserWithAuthorities();
@@ -61,21 +61,21 @@ public class PortfolioService {
         String redisKey = "user:" + user.getId() + ":portfolios";
         double timestamp = System.currentTimeMillis();
 
-        stringRedisTemplate.opsForZSet().add(redisKey, String.valueOf(portfolioId), timestamp);
+        redisTemplate.opsForZSet().add(redisKey, String.valueOf(portfolioId), timestamp);
     }
     private void cacheNewPortfolioForFollowers(Long newPortfolioId, List<Long> followerIds, double timestamp) {
         followerIds.forEach(followerId -> {
             String redisKey = "user:" + followerId + ":portfolios";
-            stringRedisTemplate.opsForZSet().add(redisKey, newPortfolioId.toString(), timestamp);
+            redisTemplate.opsForZSet().add(redisKey, newPortfolioId.toString(), timestamp);
         });
     }
     public List<Portfolio> getLatestPortfolios() {
         UserEntity userEntity = userService.getMyUserWithAuthorities();
         String redisKey = "user:" + userEntity.getId() + ":portfolios";
-        Set<String> portfolioIds = stringRedisTemplate.opsForZSet().reverseRange(redisKey, 0, -1);
+        Set<Object> portfolioIds = redisTemplate.opsForZSet().reverseRange(redisKey, 0, -1);
 
         if (portfolioIds != null && !portfolioIds.isEmpty()) {
-            List<Long> portfolioIdsLong = portfolioIds.stream().map(Long::parseLong).collect(Collectors.toList());
+            List<Long> portfolioIdsLong = portfolioIds.stream().map(id -> Long.parseLong(id.toString())).collect(Collectors.toList());
             List<PortfolioEntity> portfolioEntities = portfolioRepository.findByIdInOrderByCreatedAtDesc(portfolioIdsLong);
             return portfolioEntities.stream().map(Portfolio::fromEntity).collect(Collectors.toList());
         }else {
@@ -126,13 +126,13 @@ public class PortfolioService {
 
     @Transactional(readOnly = true)
     public List<Portfolio> getAllPortfolios() {
-        List<PortfolioEntity> postsEntity = portfolioRepository.findAll();
+        List<PortfolioEntity> portfolioEntities = portfolioRepository.findAll();
 
-        if (postsEntity.isEmpty()) {
+        if (portfolioEntities.isEmpty()) {
             throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "포트폴리오가 없습니다.");
         }
 
-        List<Portfolio> portfolios = postsEntity.stream()
+        List<Portfolio> portfolios = portfolioEntities.stream()
                 .map(Portfolio::fromEntity)
                 .collect(Collectors.toList());
 
