@@ -9,7 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -43,6 +45,7 @@ public class UserEntity {
     private List<FollowEntity> followings;
 
 
+
     @OneToOne(mappedBy = "user")
     private ProfileImageEntity profileImage;
 
@@ -63,6 +66,11 @@ public class UserEntity {
         this.profileImage = profileImage;
         this.userChatRooms = userChatRooms;
     }
-
+    public List<Long> getFollowerIds() {
+        return this.getFollowers()
+                .stream()
+                .map(FollowEntity::getId)
+                .collect(Collectors.toList());
+    }
 
 }

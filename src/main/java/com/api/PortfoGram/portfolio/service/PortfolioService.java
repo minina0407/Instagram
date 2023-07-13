@@ -10,6 +10,7 @@ import com.api.PortfoGram.portfolio.dto.PortfolioImage;
 import com.api.PortfoGram.portfolio.entity.PortfolioEntity;
 import com.api.PortfoGram.portfolio.entity.PortfolioImageEntity;
 import com.api.PortfoGram.portfolio.repository.PortfolioRepository;
+import com.api.PortfoGram.user.entity.FollowEntity;
 import com.api.PortfoGram.user.entity.UserEntity;
 import com.api.PortfoGram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +33,6 @@ public class PortfolioService {
     private final UserService userService;
     private final PortfolioImageService portfolioImageService;
     private final RedisTemplate redisTemplate;
-
     @Transactional
     public void savePortfolio(String content, List<MultipartFile> imageFiles) {
         UserEntity user = userService.getMyUserWithAuthorities();
@@ -51,9 +52,27 @@ public class PortfolioService {
                     .build();
             savedPortfolioEntity.addImage(portfolioImageEntity);
         }
+        cacheLatestPortfolioForUser(user, savedPortfolioEntity.getId());
+
+        // 수정된 부분: user.getFollowers()를 userEntity에서 user로 변경
+        List<Long> followerIds = user.getFollowerIds();
+        cacheNewPortfolioForFollowers(savedPortfolioEntity.getId(), followerIds);
     }
+    private void cacheLatestPortfolioForUser(UserEntity user, Long portfolioId) {
+        String redisKey = "user:" + user.getId() + ":portfolios";
 
+        // 새로 생성된 포트폴리오 ID를 저장소의 첫 번째 요소로 삽입
+        redisTemplate.opsForList().leftPush(redisKey, String.valueOf(portfolioId));
 
+        // 저장소 크기를 제한 (선택 사항)
+        redisTemplate.opsForList().trim(redisKey, 0, 99);
+    }
+    public void cacheNewPortfolioForFollowers(Long newPortfolioId, List<Long> followerIds) {
+        followerIds.forEach(followerId -> {
+            String redisKey = "user:" + followerId + ":portfolios";
+            redisTemplate.opsForList().rightPush(redisKey, newPortfolioId.toString());
+        });
+    }
     public List<Portfolio> getLatestPortfolios() {
         UserEntity userEntity = userService.getMyUserWithAuthorities();
         String redisKey = "user:" + userEntity.getId() + ":portfolios";

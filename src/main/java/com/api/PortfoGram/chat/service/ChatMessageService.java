@@ -38,7 +38,7 @@ public class ChatMessageService {
     public void saveChatMessageToRedis(ChatMessage chatMessage) {
         // Redis에 메시지 저장
         String redisKey = "chatMessages:" + chatMessage.getChatRoomId();
-        redisTemplate.opsForList().leftPush(redisKey, chatMessage);
+        redisTemplate.opsForList().leftPush(redisKey, chatMessage.toEntity());
     }
     public List<ChatMessage> getLastMessages(Long roomId) {
         String redisKey = "chatMessages:" + roomId;

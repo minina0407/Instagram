@@ -36,10 +36,9 @@ import static com.api.PortfoGram.chat.constant.RabbitMQConstant.EXCHANGE_NAME;
 @Slf4j
 public class ChatController {
     private final ChatRoomService chatRoomService;
-   private final ChatMessageService chatMessageService;
+    private final ChatMessageService chatMessageService;
     private final UserService userService;
     private final RabbitTemplate rabbitTemplate;
-    private final RedisTemplate redisTemplate;
     @PostMapping("/rooms")
     @Operation(summary = "채팅방 생성", description = "채팅방을 생성합니다.")
     @ApiResponses(value = {
@@ -72,7 +71,6 @@ public class ChatController {
     }
 
 
-
     @MessageMapping("/rooms/{roomId}/messages")
     @Operation(summary = "메시지 전송", description = "채팅방에 메시지를 전송합니다.")
     @ApiResponses(value = {
@@ -90,15 +88,15 @@ public class ChatController {
             throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "채팅방이 존재하지 않습니다.");
         }
         UserEntity sender = userService.getMyUserWithAuthorities();
-        log.info("chatRoomId = {}", roomId);
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "chat." + roomId, chatMessage.toEntity());
 
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "chat." + roomId, chatMessage.toEntity());
+        log.info("chatRoomId = {}", roomId);
         chatMessageService.saveChatMessage(sender, chatMessage.getContent(), roomId);
     }
 
     @RabbitListener(queues = CHAT_QUEUE_NAME) // 메세지가 큐에
-    public void receive(ChatMessage chatMessage){
-        log.info("message.get={}",chatMessage.getContent());
+    public void receive(ChatMessage chatMessage) {
+        log.info("message.get={}", chatMessage.getContent());
         chatMessageService.saveChatMessageToRedis(chatMessage);
     }
 
@@ -106,7 +104,7 @@ public class ChatController {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "404",
                     content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "{ \"message\": \"채팁앙을 찾을 수 없습니다.\" }")))
+                            examples = @ExampleObject(value = "{ \"message\": \"채팅방을 찾을 수 없습니다.\" }")))
     })
     @GetMapping("/rooms/{roomId}/messages")
     @Operation(summary = "채팅방 메시지 조회", description = "해당 채팅방의 최근 메시지를 조회합니다.")
@@ -117,5 +115,4 @@ public class ChatController {
         return chatMessageService.getLastMessages(roomId);
     }
 
-    // TODO : 최근 20개 불러오는 API 에서 레디스에서 읽어오기
 }

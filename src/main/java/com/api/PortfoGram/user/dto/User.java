@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
 public class User {
@@ -14,7 +16,6 @@ public class User {
     private String email;
     private String name;
     private String password;
-
     @Builder
     public User(Long id, String nickname, String email, String name, String password) {
         this.id = id;
