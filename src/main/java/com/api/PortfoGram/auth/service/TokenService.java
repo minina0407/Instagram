@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.redis.core.RedisTemplate;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -26,7 +27,7 @@ public class TokenService {
     private final JwtTokenProvider jwtTokenProvider;
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final RedisTemplate redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
     private static final String REFRESH_TOKEN_PREFIX = "refreshToken:";
 
     public Token login(AuthorizeUser user) {
@@ -46,7 +47,7 @@ public class TokenService {
                 .refreshToken(refreshToken)
                 .build();
 
-        redisTemplate.opsForValue().set(REFRESH_TOKEN_PREFIX + authentication.getName(),
+        stringRedisTemplate.opsForValue().set(REFRESH_TOKEN_PREFIX + authentication.getName(),
                 token.getRefreshToken(), 7, TimeUnit.DAYS);
         return token;
     }
@@ -60,7 +61,7 @@ public class TokenService {
         Authentication authentication = jwtTokenProvider.getAuthentication(reissue.getAccessToken());
 
         // 3. Redis에서 User email을 기반으로 저장된 Refresh Token 값을 가져옴
-        String refreshToken = (String) redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + authentication.getName());
+        String refreshToken = stringRedisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + authentication.getName());
         if (!refreshToken.equals(reissue.getRefreshToken())) {
             throw new BadRequestException("Refresh Token 정보가 일치하지 않습니다.");
         }
@@ -80,7 +81,7 @@ public class TokenService {
                 .build();
 
         // 5. RefreshToken Redis 업데이트
-        redisTemplate.opsForValue()
+        stringRedisTemplate.opsForValue()
                 .set(REFRESH_TOKEN_PREFIX + authentication.getName(), tokenInfo.getRefreshToken(), Duration.ofDays(7));
 
         return tokenInfo;
