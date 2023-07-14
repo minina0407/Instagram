@@ -97,7 +97,6 @@ public class ChatController {
     @RabbitListener(queues = CHAT_QUEUE_NAME) // 메세지가 큐에
     public void receive(ChatMessage chatMessage) {
         log.info("message.get={}", chatMessage.getContent());
-        chatMessageService.saveChatMessageToRedis(chatMessage);
     }
 
     @ApiResponses(value = {

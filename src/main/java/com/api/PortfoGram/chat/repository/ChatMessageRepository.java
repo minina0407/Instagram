@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, Long> {
-    List<ChatMessageEntity> findTop20ByChatRoomOrderByCreatedAtDesc(ChatRoomEntity chatRoom);
+    List<ChatMessageEntity> findTop20ByChatRoomIdOrderByCreatedAtDesc(Long chatRoomId);
 }
