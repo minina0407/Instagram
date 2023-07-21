@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .httpBasic().disable()
                 .authorizeRequests()
-                .antMatchers("/api/**", "/actuator/**").permitAll()
+                .antMatchers("/api/**","/ws/**", "/actuator/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/swagger-ui/**","/api-docs/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()
                 .and()

@@ -8,6 +8,7 @@ import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -19,34 +20,42 @@ import java.util.Optional;
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserChatRoomRepository userChatRoomRepository;
-
+    private final RabbitTemplate rabbitTemplate;
+    public static final String CHAT_ROOM_CREATE_EXCHANGE_NAME = "chat_room_create_exchange";
+    public static final String CHAT_ROOM_JOIN_EXCHANGE_NAME = "chat_room_join_exchange";
+    public static final String CHAT_ROOM_CREATE_ROUTING_KEY = "chat_room_create";
+    public static final String CHAT_ROOM_JOIN_ROUTING_KEY = "chat_room_join";
     @Transactional
     public Long createNewChatRoom(UserEntity sender, UserEntity receiver) {
         validateParameters(sender, receiver);
-        // ChatRoom 생성 및 저장
+
+        ChatRoomEntity chatRoom = createAndSaveChatRoom(sender, receiver);
+
+        saveUserChatRoom(sender, chatRoom);
+        saveUserChatRoom(receiver, chatRoom);
+
+        rabbitTemplate.convertAndSend(CHAT_ROOM_CREATE_EXCHANGE_NAME, CHAT_ROOM_CREATE_ROUTING_KEY, chatRoom.getId());
+
+        return chatRoom.getId();
+    }
+
+    private ChatRoomEntity createAndSaveChatRoom(UserEntity sender, UserEntity receiver){
         ChatRoomEntity chatRoom = ChatRoomEntity.builder()
                 .senderId(sender.getId())
                 .receiverId(receiver.getId())
                 .createdAt(LocalDateTime.now())
                 .build();
         chatRoomRepository.save(chatRoom);
-
-        // UserChatRoom 생성 및 저장
-        UserChatRoomEntity senderUserChatRoom = UserChatRoomEntity.builder()
-                .chatRoom(chatRoom)
-                .user(sender)
-                .build();
-        userChatRoomRepository.save(senderUserChatRoom);
-
-        UserChatRoomEntity receiverUserChatRoom = UserChatRoomEntity.builder()
-                .chatRoom(chatRoom)
-                .user(receiver)
-                .build();
-        userChatRoomRepository.save(receiverUserChatRoom);
-
-        return chatRoom.getId();
+        return chatRoom;
     }
 
+    private void saveUserChatRoom(UserEntity user, ChatRoomEntity chatRoom){
+        UserChatRoomEntity userChatRoom = UserChatRoomEntity.builder()
+                .chatRoom(chatRoom)
+                .user(user)
+                .build();
+        userChatRoomRepository.save(userChatRoom);
+    }
     public void joinChatRoom(Long roomId, UserEntity user) {
         // ChatRoom 조회 및 사용자 추가
         ChatRoomEntity chatRoom = chatRoomRepository.findById(roomId)
@@ -57,6 +66,8 @@ public class ChatRoomService {
                 .user(user)
                 .build();
         userChatRoomRepository.save(userChatRoom);
+
+        rabbitTemplate.convertAndSend(CHAT_ROOM_JOIN_EXCHANGE_NAME, CHAT_ROOM_JOIN_ROUTING_KEY, roomId);
 
     }
 

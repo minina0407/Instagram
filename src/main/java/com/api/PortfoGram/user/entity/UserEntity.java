@@ -3,10 +3,7 @@ package com.api.PortfoGram.user.entity;
 
 import com.api.PortfoGram.auth.enums.AuthEnums;
 import com.api.PortfoGram.chat.entity.UserChatRoomEntity;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -15,7 +12,8 @@ import java.util.stream.Collectors;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 @Table(name = "user")
 public class UserEntity {
     @Id
