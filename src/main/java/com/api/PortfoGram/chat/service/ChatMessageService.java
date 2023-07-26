@@ -1,26 +1,24 @@
 package com.api.PortfoGram.chat.service;
 
 import com.api.PortfoGram.chat.dto.ChatMessage;
-import com.api.PortfoGram.chat.dto.Message;
 import com.api.PortfoGram.chat.entity.ChatMessageEntity;
 import com.api.PortfoGram.chat.entity.ChatRoomEntity;
 import com.api.PortfoGram.chat.repository.ChatMessageRepository;
-import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.api.PortfoGram.chat.constant.RabbitMQConstant.EXCHANGE_NAME;
+import static java.time.LocalDateTime.now;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,19 +29,19 @@ public class ChatMessageService {
 
 
     @Transactional
-    public void saveChatMessage(Long roomId,Message message) {
-        ChatRoomEntity chatRoom = chatRoomService.getChatRoomById(roomId);
+    public void saveChatMessage(Long chatRoomId, ChatMessage message, Long senderId){
+        ChatRoomEntity chatRoom = chatRoomService.getChatRoomById(chatRoomId);
+        Long receiverId = chatRoom.getSenderId().equals(senderId) ? chatRoom.getReceiverId() : chatRoom.getSenderId();
         ChatMessageEntity chatMessage = ChatMessageEntity.builder()
                 .chatRoom(chatRoom)
-                .senderId(message.getSenderId())
-                .receiverId(message.getSenderId())
-                .content((String) message.getContent())
-                .createdAt(LocalDateTime.now())
+                .senderId(senderId)
+                .receiverId(receiverId)
+                .content(message.getContent())
+                .createdAt(now())
                 .build();
         chatMessageRepository.save(chatMessage);
-
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "chat." + roomId, message);
-        log.info("chatRoomId = {}", message.getChannelId());
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "chat."+ chatRoomId, chatMessage.toEntity(chatMessage)); // toEntity()로 변환하여 보내기
+        log.info("chatRoomId = {}", chatMessage.getChatRoom().getId());
     }
     public List<ChatMessage> getLastMessages(Long roomId) {
         // DB에서 최근 20개의 채팅 메시지를 가져옵니다.

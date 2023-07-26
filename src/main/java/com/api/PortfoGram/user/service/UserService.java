@@ -1,6 +1,7 @@
 package com.api.PortfoGram.user.service;
 
 import com.api.PortfoGram.auth.enums.AuthEnums;
+import com.api.PortfoGram.auth.utils.JwtTokenProvider;
 import com.api.PortfoGram.auth.utils.SecurityUtil;
 import com.api.PortfoGram.exception.dto.BadRequestException;
 import com.api.PortfoGram.exception.dto.ExceptionEnum;
@@ -16,6 +17,7 @@ import com.api.PortfoGram.user.repository.FollowRepository;
 import com.api.PortfoGram.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,8 +30,8 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RedisTemplate<String, String> redisTemplate;
-    private final FollowRepository followRepository;
+   private final JwtTokenProvider jwtTokenProvider;
+
 
     @Transactional(readOnly = true)
     public Profile searchProfileById(Long userId) {
@@ -59,21 +61,7 @@ public class UserService {
 
         return userEntity;
     }
-    public Set<Long> getFollowers(Long userId) {
-        String redisKey = "user:" + userId + ":followers";
-        Set<String> followerIds = redisTemplate.opsForSet().members(redisKey);
 
-        if (followerIds != null && !followerIds.isEmpty()) {
-            return followerIds.stream().map(Long::parseLong).collect(Collectors.toSet());
-        } else {
-            // 기존 저장소에서 팔로워 목록을 가져오고 Redis에 갱신하는 로직 추가
-            Set<Long> followers = followRepository.findFollowerIdsById(userId);
-            if (followers != null && !followers.isEmpty()) {
-                redisTemplate.opsForSet().add(redisKey, Arrays.toString(followers.toArray()));
-            }
-        }
-        return new HashSet<>();
-    }
     @Transactional
     public void saveUser(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -95,7 +83,12 @@ public class UserService {
         userRepository.save(userEntity);
     }
 
-
+    public Long getUserIdFromToken(String token) {
+        Authentication authentication = jwtTokenProvider.getAuthentication(token);
+        String name = authentication.getName();
+        Optional<UserEntity> user = userRepository.findByEmail(name);
+        return user.get().getId();
+    }
 
     private String getRedisKey(Long userId) {
         return "user:" + userId + ":followedPortfolios";

@@ -32,8 +32,8 @@ public class UserEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-
     @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING) // Add this annotation to specify that it's an enum.
     private AuthEnums.ROLE role;
 
     @OneToMany(mappedBy = "follower")
