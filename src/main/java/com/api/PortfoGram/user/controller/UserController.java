@@ -25,7 +25,7 @@ import javax.validation.Valid;
 @Tag(name = "사용자 API", description = "사용자 관련 API")
 public class UserController {
 
-    private final UserService userService;
+   private final UserService userService;
     private final FollowService followService;
 
     @GetMapping("/profile")

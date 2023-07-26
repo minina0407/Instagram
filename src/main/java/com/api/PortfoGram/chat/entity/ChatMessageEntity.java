@@ -2,19 +2,22 @@ package com.api.PortfoGram.chat.entity;
 
 import com.api.PortfoGram.chat.dto.ChatMessage;
 import com.api.PortfoGram.user.entity.UserEntity;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "chat_message")
-public class ChatMessageEntity {
+public class ChatMessageEntity  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -48,10 +51,10 @@ public class ChatMessageEntity {
         return ChatMessage.builder()
                 .id(chatMessageEntity.getId())
                 .senderId(chatMessageEntity.getSenderId())
-                .receiverId(chatMessageEntity.getReceiverId())
                 .content(chatMessageEntity.getContent())
                 .createdAt(chatMessageEntity.getCreatedAt())
                 .chatRoomId(chatMessageEntity.getChatRoom().getId())
                 .build();
     }
+
 }

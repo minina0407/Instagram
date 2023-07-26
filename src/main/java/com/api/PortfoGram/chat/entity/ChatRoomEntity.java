@@ -2,6 +2,7 @@ package com.api.PortfoGram.chat.entity;
 
 
 import com.api.PortfoGram.user.entity.UserEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,6 +36,7 @@ public class ChatRoomEntity {
 
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<ChatMessageEntity> chatMessages = new ArrayList<>();
     @Builder
     public ChatRoomEntity(Long id, Long senderId, Long receiverId, LocalDateTime createdAt, List<UserChatRoomEntity> userChatRooms, List<ChatMessageEntity> chatMessages) {

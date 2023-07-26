@@ -6,9 +6,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
-public class AuthEnums{
+public class AuthEnums {
         @Getter
-        public enum ROLE  {
+        public enum ROLE {
                 ROLE_USER("ROLE_USER"),
                 ROLE_ADMIN("ROLE_ADMIN");
 
@@ -18,5 +18,4 @@ public class AuthEnums{
                         this.role = role;
                 }
         }
-
 }
