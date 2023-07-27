@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan = "true" scanPeriod = "60 seconds">
+<configuration scan="true" scanPeriod="60 seconds">
     <!-- Appender 선언 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -74,10 +74,6 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>132.226.225:5000</destination>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
-    </appender>
     <!-- Root 로거 설정 -->
     <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
@@ -85,6 +81,5 @@
         <appender-ref ref="INFO_FILE"/>
         <appender-ref ref="WARN_FILE"/>
         <appender-ref ref="ERROR_FILE"/>
-        <appender-ref ref="LOGSTASH"/>
     </root>
 </configuration>
