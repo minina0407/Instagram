@@ -24,7 +24,7 @@ import javax.validation.Valid;
 public class TokenController {
     private final TokenService tokenService;
 
-    @Operation(summary = "사용자 로그인", description = "사용자를 인증하고 토큰을 발급합니다.")
+    @Operation(summary = "사용자 로그인", description = "로그인을 통해 사용자를 인증하고 토큰을 발급합니다.")
     @ApiResponse(responseCode = "200", description = "로그인 성공",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Token.class)))
@@ -34,7 +34,7 @@ public class TokenController {
         return new ResponseEntity<>(token, HttpStatus.OK);
     }
 
-    @Operation(summary = "토큰 재발급", description = "유효한 토큰을 재발급합니다.")
+    @Operation(summary = "토큰 재발급", description = "유효한 REFRESH 토큰을 재발급합니다.")
     @ApiResponse(responseCode = "200", description = "토큰 재발급 성공")
     @PostMapping("/reissue")
     public ResponseEntity<String> reissueToken(@Valid @RequestBody Token token) {
