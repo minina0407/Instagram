@@ -30,4 +30,8 @@
   <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&amp;logo=Redis&amp;logoColor=white" alt="Redis"/>
 </p>
 
-## ER Diagram
+## 시스템 구조
+![cloud](https://github.com/minina0407/PortfoGram/assets/83204216/a9f425b1-8c36-46e8-b973-f76744ba9ad4)
+
+
+
