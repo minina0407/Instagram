@@ -43,6 +43,7 @@ public class CommentController {
         return new ResponseEntity<>(replies, HttpStatus.OK);
     }
 
+
     @PutMapping("/comments/{commentId}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     @Operation(summary = "댓글 수정", description = "특정 댓글을 수정합니다.")

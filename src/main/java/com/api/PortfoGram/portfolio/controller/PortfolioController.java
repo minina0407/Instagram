@@ -1,7 +1,10 @@
 package com.api.PortfoGram.portfolio.controller;
 
 import com.api.PortfoGram.comment.dto.Comment;
+import com.api.PortfoGram.comment.dto.Comments;
 import com.api.PortfoGram.comment.service.CommentService;
+import com.api.PortfoGram.exception.dto.BadRequestException;
+import com.api.PortfoGram.exception.dto.ExceptionEnum;
 import com.api.PortfoGram.portfolio.dto.Portfolio;
 import com.api.PortfoGram.portfolio.dto.PortfolioLike;
 import com.api.PortfoGram.portfolio.service.PortfolioService;
@@ -62,22 +65,25 @@ public class PortfolioController {
     @GetMapping("/{portfolioId}/comments")
     @Operation(summary = "포트폴리오 댓글 조회", description = "특정 포트폴리오의 댓글을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "포트폴리오 댓글 목록 조회 성공")
-    public ResponseEntity<Page<Comment>> getCommentsByPortfolioId(
+    public ResponseEntity<Comments> getCommentsByPortfolioId(
             @PathVariable("portfolioId") Long portfolioId,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<Comment> comments = commentService.getCommentsByPostId(portfolioId, pageable);
+        Comments comments = commentService.getCommentsByPostId(portfolioId, pageable);
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
-
+    @PostMapping("/{portfolioId}/comments")
+    public ResponseEntity<Void> createComment(@RequestBody Comment comment,@PathVariable Long portfolioId) {
+        commentService.createComment(comment,portfolioId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "포트폴리오 저장", description = "포트폴리오를 저장합니다.")
     @ApiResponse(responseCode = "200", description = "포트폴리오 저장 성공")
     public ResponseEntity<Portfolio> savePortfolio(
             @RequestParam(value = "images", required = true) List<MultipartFile> imageFiles,
-            @RequestParam(value = "content", required = true) String content) {
-
-        portfolioService.savePortfolio(content, imageFiles);
+            @RequestParam(value = "content", required = false) String content) {
+         portfolioService.savePortfolio(content, imageFiles);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     @PostMapping("/{portfolioId}/likes")

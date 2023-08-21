@@ -61,7 +61,7 @@ public class CommentEntity{
     public Comment fromEntity(CommentEntity commentEntity) {
         return Comment.builder()
                 .id(commentEntity.getId())
-                .postId(commentEntity.getPortfolio().getId())
+                .portfolioId(commentEntity.getPortfolio().getId())
                 .content(commentEntity.getContent())
                 .createdAt(commentEntity.getCreatedAt())
                 .build();

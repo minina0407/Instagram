@@ -19,25 +19,25 @@ public class Comment implements Serializable {
     private static final long serialVersionUID = 1L;
     private Long id;
     private User user;
-    private Long postId;
+    private Long portfolioId;
     private String content;
     private Date createdAt;
     private String nickname;
     private List<Reply> replies;
 
     @Builder
-    public Comment(Long id, User user, Long postId, String content, Date createdAt,String nickname,List<Reply> replies) {
+    public Comment(Long id, User user, Long portfolioId, String content, Date createdAt,String nickname,List<Reply> replies) {
         this.id = id;
         this.user = user;
-        this.postId = postId;
+        this.portfolioId = portfolioId;
         this.content = content;
         this.createdAt = createdAt;
         this.nickname = nickname;
         this.replies =replies;
     }
 
-    public void setPostId(Long postId) {
-        this.postId = postId;
+    public void setPortfolioIdd(Long portfolioId) {
+        this.portfolioId = portfolioId;
     }
 
     public static Comment fromEntity(CommentEntity commentEntity) {
@@ -49,6 +49,7 @@ public class Comment implements Serializable {
 
         return Comment.builder()
                 .id(commentEntity.getId())
+                .portfolioId(commentEntity.getPortfolio().getId())
                 .content(commentEntity.getContent())
                 .nickname(commentEntity.getUser().getNickname())
                 .replies(replies)

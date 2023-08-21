@@ -40,6 +40,7 @@ public class PortfolioService {
     private final StringRedisTemplate stringRedisTemplate;
     @Transactional
     public void savePortfolio(String content, List<MultipartFile> imageFiles) {
+
         UserEntity user = userService.getMyUserWithAuthorities();
         PortfolioEntity portfolioEntity = PortfolioEntity.builder()
                 .user(user)
@@ -116,7 +117,7 @@ public class PortfolioService {
                     .id(portfolioEntity.getId())
                     .userId(portfolioEntity.getUser().getId())
                     .content(portfolioEntity.getContent())
-                    .postImages(portfolioImage)
+                    .portfolioImages(portfolioImage)
                     .build();
 
             redisTemplate.opsForValue().set(redisKey, portfolio);
@@ -152,7 +153,7 @@ public class PortfolioService {
         PortfolioEntity portfolioEntity = portfolioRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "포트폴리오를 찾을 수 없습니다."));
 
-        portfolioEntity.updateContent(portfolioRequest.getContent()); // 게시글 내용 업데이트
+        portfolioEntity.updateContent(portfolioRequest.getContent());
 
         portfolioRepository.save(portfolioEntity);
 

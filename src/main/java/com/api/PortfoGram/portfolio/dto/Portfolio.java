@@ -1,8 +1,11 @@
 package com.api.PortfoGram.portfolio.dto;
 
 import com.api.PortfoGram.comment.dto.Comment;
+import com.api.PortfoGram.comment.entity.CommentEntity;
 import com.api.PortfoGram.portfolio.entity.PortfolioEntity;
+import com.api.PortfoGram.portfolio.entity.PortfolioImageEntity;
 import com.api.PortfoGram.reply.dto.Reply;
+import com.api.PortfoGram.user.dto.User;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,23 +27,23 @@ public class Portfolio implements Serializable {
     @NotBlank(message = "내용이 없습니다.")
     private String content;
     private Date createdAt;
-    private List<PortfolioImage> postImages;
+    private List<PortfolioImage> portfolioImages;
     private List<Comment> comments;
     private List<Reply> replies;
 
     @Builder
-    public Portfolio(Long id, Long userId, String content, Date createdAt, List<PortfolioImage> postImages, List<Comment> comments, List<Reply> replies) {
+    public Portfolio(Long id, Long userId, String content, Date createdAt, List<PortfolioImage> portfolioImages, List<Comment> comments, List<Reply> replies) {
         this.id = id;
         this.userId = userId;
         this.content = content;
         this.createdAt = createdAt;
-        this.postImages = postImages;
+        this.portfolioImages = portfolioImages;
         this.comments = comments;
         this.replies = replies;
     }
 
     public static Portfolio fromEntity(PortfolioEntity portfolioEntity) {
-        List<PortfolioImage> postImages = portfolioEntity.getPortfolioImages().stream()
+        List<PortfolioImage> portfolioImageList = portfolioEntity.getPortfolioImages().stream()
                 .map(PortfolioImage::fromEntity)
                 .collect(Collectors.toList());
 
@@ -53,7 +56,7 @@ public class Portfolio implements Serializable {
                 .id(portfolioEntity.getId())
                 .content(portfolioEntity.getContent())
                 .userId(portfolioEntity.getUser().getId())
-                .postImages(postImages)
+                .portfolioImages(portfolioImageList)
                 .comments(comments)
                 .build();
     }
