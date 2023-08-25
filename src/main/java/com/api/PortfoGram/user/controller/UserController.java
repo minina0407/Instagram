@@ -29,7 +29,7 @@ public class UserController {
     private final FollowService followService;
 
     @GetMapping("/profile")
-    @Operation(summary = "프로필 조회", description = "사용자 프로필을 조회합니다.")
+    @Operation(summary = "프로필 조회", description = "사용자의 프로필을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     content = @Content(mediaType = "application/json",

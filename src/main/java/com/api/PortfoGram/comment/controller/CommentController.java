@@ -60,7 +60,7 @@ public class CommentController {
 
     @DeleteMapping("/comments/{commentId}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제합니다.")
+    @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제 합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "댓글 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
