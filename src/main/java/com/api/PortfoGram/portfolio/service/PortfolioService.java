@@ -56,12 +56,14 @@ public class PortfolioService {
                     .portfolio(savedPortfolioEntity)
                     .build();
             savedPortfolioEntity.addImage(portfolioImageEntity);
+            savedPortfolioEntity.addImage(portfolioImageEntity);
         }
 
         cacheLatestPortfolioForUser(user.getId().toString(), savedPortfolioEntity.getId());
 
         List<Long> followerIds = user.getFollowerIds();
-        cacheNewPortfolioForFollowers(savedPortfolioEntity.getId().toString(), followerIds, savedPortfolioEntity.getCreatedAt().getTime());   }
+        cacheNewPortfolioForFollowers(savedPortfolioEntity.getId().toString(), followerIds, savedPortfolioEntity.getCreatedAt().getTime());
+    }
     private void cacheLatestPortfolioForUser(String userId, Long portfolioId) {
         String redisKey = "user:" + userId+ ":portfolios";
         double timestamp = System.currentTimeMillis();
@@ -116,7 +118,8 @@ public class PortfolioService {
                     .id(portfolioEntity.getId())
                     .userId(portfolioEntity.getUser().getId())
                     .content(portfolioEntity.getContent())
-                    .postImages(portfolioImage)
+                    .portfolioImages(portfolioImage)
+                    .createdAt(portfolioEntity.getCreatedAt())
                     .build();
 
             redisTemplate.opsForValue().set(redisKey, portfolio);

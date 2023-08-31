@@ -36,7 +36,8 @@ public class ReplyController {
             @RequestBody Reply reply
     ) {
         Reply updatedReply = replyService.updateReply(commentId, reply);
-        return new ResponseEntity<>(updatedReply, HttpStatus.OK);
+        return new ResponseEntity<>(
+                updatedReply, HttpStatus.OK);
     }
 
     @DeleteMapping("/{commentId}")

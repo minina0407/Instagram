@@ -1,6 +1,7 @@
 package com.api.PortfoGram.portfolio.controller;
 
 import com.api.PortfoGram.comment.dto.Comment;
+import com.api.PortfoGram.comment.dto.Comments;
 import com.api.PortfoGram.comment.service.CommentService;
 import com.api.PortfoGram.portfolio.dto.Portfolio;
 import com.api.PortfoGram.portfolio.dto.PortfolioLike;
@@ -62,11 +63,11 @@ public class PortfolioController {
     @GetMapping("/{portfolioId}/comments")
     @Operation(summary = "포트폴리오 댓글 조회", description = "특정 포트폴리오의 댓글을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "포트폴리오 댓글 목록 조회 성공")
-    public ResponseEntity<Page<Comment>> getCommentsByPortfolioId(
+    public ResponseEntity<Comments> getCommentsByPortfolioId(
             @PathVariable("portfolioId") Long portfolioId,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<Comment> comments = commentService.getCommentsByPostId(portfolioId, pageable);
+        Comments comments = commentService.getCommentsByPortfolioId(portfolioId, pageable);
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
@@ -91,6 +92,12 @@ public class PortfolioController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
     @GetMapping("/latest")
+    @Operation(summary = "최신 포트폴리오 조회",description  = "사용자의 최신 포트폴리오 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청이 성공하고 최신 포트폴리오 목록을 반환합니다."),
+            @ApiResponse(responseCode= "401", description= "인증되지 않은 사용자입니다."),
+            @ApiResponse(responseCode= "403", description = "접근 권한이 없습니다.")
+    }) @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<List<Portfolio>> getLatestPortfolios() {
         List<Portfolio> latestPortfolios = portfolioService.getLatestPortfolios();
         return new ResponseEntity<>(latestPortfolios, HttpStatus.OK);

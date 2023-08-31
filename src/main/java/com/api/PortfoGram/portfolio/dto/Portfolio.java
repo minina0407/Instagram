@@ -24,23 +24,23 @@ public class Portfolio implements Serializable {
     @NotBlank(message = "내용이 없습니다.")
     private String content;
     private Date createdAt;
-    private List<PortfolioImage> postImages;
+    private List<PortfolioImage> portfolioImagess;
     private List<Comment> comments;
     private List<Reply> replies;
 
     @Builder
-    public Portfolio(Long id, Long userId, String content, Date createdAt, List<PortfolioImage> postImages, List<Comment> comments, List<Reply> replies) {
+    public Portfolio(Long id, Long userId, String content, Date createdAt, List<PortfolioImage> portfolioImages, List<Comment> comments, List<Reply> replies) {
         this.id = id;
         this.userId = userId;
         this.content = content;
         this.createdAt = createdAt;
-        this.postImages = postImages;
+        this.portfolioImagess = portfolioImages;
         this.comments = comments;
         this.replies = replies;
     }
 
     public static Portfolio fromEntity(PortfolioEntity portfolioEntity) {
-        List<PortfolioImage> postImages = portfolioEntity.getPortfolioImages().stream()
+        List<PortfolioImage> portfolioImages= portfolioEntity.getPortfolioImages().stream()
                 .map(PortfolioImage::fromEntity)
                 .collect(Collectors.toList());
 
@@ -53,7 +53,7 @@ public class Portfolio implements Serializable {
                 .id(portfolioEntity.getId())
                 .content(portfolioEntity.getContent())
                 .userId(portfolioEntity.getUser().getId())
-                .postImages(postImages)
+                .portfolioImages(portfolioImages)
                 .comments(comments)
                 .build();
     }

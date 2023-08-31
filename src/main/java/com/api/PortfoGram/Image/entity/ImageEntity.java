@@ -44,10 +44,10 @@ public class ImageEntity {
     private String endPoint;
 
     @OneToOne(mappedBy = "image", fetch = FetchType.LAZY)
-    private PortfolioImageEntity postImage;
+    private PortfolioImageEntity portfolioImage;
 
     @Builder
-    public ImageEntity(Long imageId, LocalDateTime createdAt, LocalDateTime deletedAt, int deletedYn, String originalFileName, Long fileSize, String fileName, String endPoint, PortfolioImageEntity postImage) {
+    public ImageEntity(Long imageId, LocalDateTime createdAt, LocalDateTime deletedAt, int deletedYn, String originalFileName, Long fileSize, String fileName, String endPoint, PortfolioImageEntity portfolioImage) {
         this.imageId = imageId;
         this.createdAt = createdAt;
         this.deletedAt = deletedAt;
@@ -56,7 +56,7 @@ public class ImageEntity {
         this.fileSize = fileSize;
         this.fileName = fileName;
         this.endPoint = endPoint;
-        this.postImage = postImage;
+        this.portfolioImage = portfolioImage;
     }
 
     public static Image fromEntity(ImageEntity image) {

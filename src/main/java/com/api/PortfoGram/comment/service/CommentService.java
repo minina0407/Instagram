@@ -2,6 +2,7 @@ package com.api.PortfoGram.comment.service;
 
 import com.api.PortfoGram.comment.dto.Comment;
 
+import com.api.PortfoGram.comment.dto.Comments;
 import com.api.PortfoGram.comment.entity.CommentEntity;
 import com.api.PortfoGram.comment.repository.CommentRepository;
 import com.api.PortfoGram.exception.dto.BadRequestException;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -22,10 +25,26 @@ public class CommentService {
 
 
     @Transactional(readOnly = true)
-    public Page<Comment> getCommentsByPostId(Long portfolioId, Pageable pageable) {
+    public Comments getCommentsByPortfolioId(Long portfolioId, Pageable pageable) {
         PortfolioEntity portfolioEntity = portfolioService.getPortfolioEntityId(portfolioId);
-        Page<CommentEntity> commentEntitiesPage = commentRepository.findAllByPortfolio(portfolioEntity, pageable);
-        return commentEntitiesPage.map(Comment::fromEntity);
+        List<Comment> commentList = commentRepository.findAllByPortfolio(portfolioEntity, pageable)
+                .map(Comment::fromEntity)
+                .toList();
+        if (portfolioEntity == null) {
+            throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID, "Invalid portfolioId: " + portfolioId);
+        }
+        if (commentList.isEmpty()) {
+            throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "댓글이 없습니다.");
+        }
+
+        Comments comments = Comments.builder()
+                .comments(commentList)
+                .totalPages(commentList.size())
+                .totalElements(commentList.size())
+                .total(commentList.size())
+                .build();
+
+        return comments;
 
     }
 

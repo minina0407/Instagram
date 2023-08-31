@@ -90,10 +90,6 @@ public class UserService {
         return user.get().getId();
     }
 
-    private String getRedisKey(Long userId) {
-        return "user:" + userId + ":followedPortfolios";
-    }
-
     @Transactional
     public void deleteMember(Long memberId) {
         UserEntity userEntity = userRepository.findById(memberId)
