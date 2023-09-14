@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,13 +27,11 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public Comments getCommentsByPortfolioId(Long portfolioId, Pageable pageable) {
-        PortfolioEntity portfolioEntity = portfolioService.getPortfolioEntityId(portfolioId);
-        List<Comment> commentList = commentRepository.findAllByPortfolio(portfolioEntity, pageable)
+        List<Comment> commentList = commentRepository.findAllByPortfolioId(portfolioId, pageable)
+                .stream()
                 .map(Comment::fromEntity)
-                .toList();
-        if (portfolioEntity == null) {
-            throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID, "Invalid portfolioId: " + portfolioId);
-        }
+                .collect(Collectors.toList());
+
         if (commentList.isEmpty()) {
             throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "댓글이 없습니다.");
         }
@@ -45,7 +44,6 @@ public class CommentService {
                 .build();
 
         return comments;
-
     }
 
     @Transactional(readOnly = true)

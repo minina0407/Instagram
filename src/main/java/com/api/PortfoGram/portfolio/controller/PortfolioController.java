@@ -11,12 +11,14 @@ import com.api.PortfoGram.portfolio.service.PortfolioLikeService;
 import javax.validation.Valid;
 
 import com.api.PortfoGram.user.entity.UserEntity;
+import com.api.PortfoGram.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -35,7 +37,7 @@ import java.util.List;
 @RequestMapping("/api/v1/portfolios")
 @Tag(name = "포트폴리오 API", description = "포트폴리오 관련 API")
 public class PortfolioController {
-
+    private final UserService userService;
     private final PortfolioService portfolioService;
     private final CommentService commentService;
     private final PortfolioLikeService portfolioLikeService;
@@ -91,17 +93,25 @@ public class PortfolioController {
         portfolioLikeService.likePortfolio(portfolioId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
     @GetMapping("/latest")
-    @Operation(summary = "최신 포트폴리오 조회",description  = "사용자의 최신 포트폴리오 목록을 조회합니다.")
+    @Operation(summary = "팔로우한 유저들의 최신 포트폴리오 조회", description = "사용자가 팔로우하는 유저들의 최신 포트폴리오 목록을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청이 성공하고 최신 포트폴리오 목록을 반환합니다."),
-            @ApiResponse(responseCode= "401", description= "인증되지 않은 사용자입니다."),
-            @ApiResponse(responseCode= "403", description = "접근 권한이 없습니다.")
-    }) @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<List<Portfolio>> getLatestPortfolios() {
-        List<Portfolio> latestPortfolios = portfolioService.getLatestPortfolios();
-        return new ResponseEntity<>(latestPortfolios, HttpStatus.OK);
+            @ApiResponse(responseCode = "200", description = "요청이 성공하고 팔로우한 유저들의 최신 포트폴리오 목록을 반환합니다."),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다."),
+            @ApiResponse(responseCode = "403", description = "접근 권한이 없습니다.")
+    })
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<Page<Portfolio>> getFollowedUsersLatestPortfolios(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        UserEntity userEntity = userService.getMyUserWithAuthorities();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Portfolio> portfolioPage = portfolioService.getLatestPortfolios(userEntity, pageable);
+        return new ResponseEntity<>(portfolioPage, HttpStatus.OK);
     }
+
 
     @PutMapping("/{portfolioId}")
     @Operation(summary = "포트폴리오 수정", description = "특정 포트폴리오를 수정합니다.")

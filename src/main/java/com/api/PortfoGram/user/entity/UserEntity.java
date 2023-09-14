@@ -42,11 +42,8 @@ public class UserEntity {
     @OneToMany(mappedBy = "following")
     private List<FollowEntity> followings;
 
-
-
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private ProfileImageEntity profileImage;
-
 
     @OneToMany(mappedBy = "user")
     private List<UserChatRoomEntity> userChatRooms;
@@ -64,11 +61,4 @@ public class UserEntity {
         this.profileImage = profileImage;
         this.userChatRooms = userChatRooms;
     }
-    public List<Long> getFollowerIds() {
-        return this.getFollowers()
-                .stream()
-                .map(FollowEntity::getId)
-                .collect(Collectors.toList());
-    }
-
 }

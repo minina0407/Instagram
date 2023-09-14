@@ -40,7 +40,7 @@ public class ChatController {
     private final ChatRoomService chatRoomService;
     private final ChatMessageService chatMessageService;
     private final UserService userService;
-private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @MessageMapping("/rooms")
     @Operation(summary = "채팅방 생성", description = "채팅방을 생성합니다.")

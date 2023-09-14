@@ -10,7 +10,9 @@ services:
       - "8080:8080"
     depends_on:
       - redis
-      - rabbitmq
+      - grafana
+      - prometheus
+      - influxdb  # InfluxDB 서비스에 의존
     container_name: Portfogram
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
@@ -18,23 +20,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
       - SPRING_REDIS_HOST=${REDIS_HOST}
       - SPRING_REDIS_PORT=${REDIS_PORT}
-      - SPRING_RABBITMQ_HOST=${RABBITMQ_HOST}
-      - SPRING_RABBITMQ_PORT=${RABBITMQ_PORT}
-      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
-      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
     networks:
       - springboot-mysql-net
-
-  rabbitmq:
-    container_name: rabbitmq_con
-    image: rabbitmq:3.9-management
-    restart: always
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    networks:
-      - springboot-mysql-net
-
 
   redis:
     image: redis
@@ -43,7 +30,6 @@ services:
       - "6380:6379"
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-    # - ALLOW_EMPTY_PASSWORD=yes
     networks:
       - springboot-mysql-net
 
@@ -55,9 +41,36 @@ services:
     networks:
       - springboot-mysql-net
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana-container
+    ports:
+      - "3001:3000"
+    networks:
+      - springboot-mysql-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-container
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./src/main/resources/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - springboot-mysql-net
+
+  influxdb:
+    image: influxdb:1.8  # InfluxDB 버전 1.8 이미지 사용
+    container_name: influxdb-container
+    ports:
+      - "8086:8086"  # InfluxDB HTTP API 포트
+    environment:
+      - INFLUXDB_DB=k6 # 원하는 데이터베이스 이름 지정
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=adminpassword
+    networks:
+      - springboot-mysql-net
+
 networks:
   springboot-mysql-net:
     driver: bridge
-
-#volumes:
-  #prometheus-data:

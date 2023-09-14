@@ -1,6 +1,9 @@
 package com.api.PortfoGram.portfolio.repository;
 
 import com.api.PortfoGram.portfolio.entity.PortfolioEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,12 +16,7 @@ import java.util.Optional;
 public interface PortfolioRepository extends JpaRepository<PortfolioEntity, Long> {
     Optional<PortfolioEntity> findPortfolioEntityById(Long id);
 
-    @Query("SELECT p FROM PortfolioEntity p WHERE p.id IN (:portfolioIds) ORDER BY p.createdAt DESC")
-    List<PortfolioEntity> findByIdInOrderByCreatedAtDesc(@Param("portfolioIds") List<Long> portfolioIds);
-
-    //
-     @Query("SELECT p FROM PortfolioEntity p WHERE p.user.id = :userId ORDER BY p.createdAt DESC")
-    List<PortfolioEntity> findLatestPortfoliosByUserId(@Param("userId") Long userId);
+    Page<PortfolioEntity> findByIdIn(List<Long> Ids, Pageable pageable);
 
 }
 

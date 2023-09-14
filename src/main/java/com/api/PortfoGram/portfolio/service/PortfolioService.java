@@ -10,11 +10,18 @@ import com.api.PortfoGram.portfolio.dto.PortfolioImage;
 import com.api.PortfoGram.portfolio.entity.PortfolioEntity;
 import com.api.PortfoGram.portfolio.entity.PortfolioImageEntity;
 import com.api.PortfoGram.portfolio.repository.PortfolioRepository;
+import com.api.PortfoGram.user.entity.FollowEntity;
 import com.api.PortfoGram.user.entity.UserEntity;
+import com.api.PortfoGram.user.service.FollowService;
 import com.api.PortfoGram.user.service.UserService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -23,13 +30,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.Cacheable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PortfolioService {
@@ -38,6 +45,8 @@ public class PortfolioService {
     private final PortfolioImageService portfolioImageService;
     private final RedisTemplate redisTemplate;
     private final StringRedisTemplate stringRedisTemplate;
+    private final FollowService followService;
+
     @Transactional
     public void savePortfolio(String content, List<MultipartFile> imageFiles) {
         UserEntity user = userService.getMyUserWithAuthorities();
@@ -56,58 +65,48 @@ public class PortfolioService {
                     .portfolio(savedPortfolioEntity)
                     .build();
             savedPortfolioEntity.addImage(portfolioImageEntity);
-            savedPortfolioEntity.addImage(portfolioImageEntity);
         }
 
         cacheLatestPortfolioForUser(user.getId().toString(), savedPortfolioEntity.getId());
 
-        List<Long> followerIds = user.getFollowerIds();
+        List<Long> followerIds = followService.getFollowerIds(user.getId());
         cacheNewPortfolioForFollowers(savedPortfolioEntity.getId().toString(), followerIds, savedPortfolioEntity.getCreatedAt().getTime());
     }
+
     private void cacheLatestPortfolioForUser(String userId, Long portfolioId) {
-        String redisKey = "user:" + userId+ ":portfolios";
+        String redisKey = "user:" + userId + ":portfolios";
         double timestamp = System.currentTimeMillis();
 
         stringRedisTemplate.opsForZSet().add(redisKey, portfolioId.toString(), timestamp);
     }
+
     private void cacheNewPortfolioForFollowers(String newPortfolioId, List<Long> followerIds, double timestamp) {
         followerIds.forEach(followerId -> {
             String redisKey = "user:" + followerId + ":portfolios";
             stringRedisTemplate.opsForZSet().add(redisKey, newPortfolioId, timestamp);
         });
     }
-    public List<Portfolio> getLatestPortfolios() {
-        UserEntity userEntity = userService.getMyUserWithAuthorities();
-        String redisKey = "user:" + userEntity.getId() + ":portfolios";
-        Set<String> portfolioIds = stringRedisTemplate.opsForZSet().reverseRange(redisKey, 0, -1);
 
-        if (portfolioIds != null && !portfolioIds.isEmpty()) {
-            List<Long> portfolioIdsLong = portfolioIds.stream().map(id -> Long.parseLong(id.toString())).collect(Collectors.toList());
-            List<PortfolioEntity> portfolioEntities = portfolioRepository.findByIdInOrderByCreatedAtDesc(portfolioIdsLong);
-            return portfolioEntities.stream().map(Portfolio::fromEntity).collect(Collectors.toList());
-        }else {
-            // 기존 저장소에서 마지막 수록된 포트폴리오 가져오고 Redis에 갱신하는 로직 추가
-            List<PortfolioEntity> latestPortfolios = portfolioRepository.findLatestPortfoliosByUserId(userEntity.getId());
-            if (latestPortfolios != null && !latestPortfolios.isEmpty()) {
-                Map<String, Double> portfolioIdsWithTimestamp = latestPortfolios.stream()
-                        .collect(Collectors.toMap(portfolio -> String.valueOf(portfolio.getId()),
-                                portfolio -> (double) portfolio.getCreatedAt().getTime()));
-                stringRedisTemplate.opsForZSet().add(redisKey, portfolioIdsWithTimestamp.entrySet().stream()
-                        .map(entry -> new DefaultTypedTuple<>(entry.getKey(), entry.getValue()))
-                        .collect(Collectors.toSet()));
+    public Page<Portfolio> getLatestPortfolios(UserEntity userEntity, Pageable pageable) {
+        String redisKeyForCurrentUserFollowings = "user:" + userEntity.getId() + ":portfolios";
+        Set<String> portfolioIds = stringRedisTemplate.opsForZSet().reverseRange(redisKeyForCurrentUserFollowings, 0, -1);
 
-                return latestPortfolios.stream().map(Portfolio::fromEntity).collect(Collectors.toList());
-            }
-        }
-        return new ArrayList<>();
+        List<Long> followedUserIdsAsLong = portfolioIds.stream()
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+
+        Page<PortfolioEntity> portfolioEntityPage = portfolioRepository.findByIdIn(followedUserIdsAsLong, pageable);
+        Page<Portfolio> portfolio = portfolioEntityPage.map(Portfolio::fromEntity);
+        return portfolio;
     }
+
     @Transactional(readOnly = true)
     public Portfolio getPortfolioById(Long portfolioId) {
         String redisKey = "portfolio:" + portfolioId;
         Portfolio portfolio = (Portfolio) redisTemplate.opsForValue().get(redisKey);
 
         if (portfolio == null) {
-            PortfolioEntity portfolioEntity = portfolioRepository. findPortfolioEntityById(portfolioId)
+            PortfolioEntity portfolioEntity = portfolioRepository.findPortfolioEntityById(portfolioId)
                     .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "피드를 찾을 수 없습니다."));
             List<PortfolioImage> portfolioImage = portfolioEntity.getPortfolioImages()
                     .stream()

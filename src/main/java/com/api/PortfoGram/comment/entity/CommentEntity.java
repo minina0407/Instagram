@@ -17,6 +17,8 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@NamedEntityGraph(name = "Comment.portfolio",
+        attributeNodes = @NamedAttributeNode("portfolio"))
 @Table(name = "comment")
 @Getter
 public class CommentEntity{
