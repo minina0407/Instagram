@@ -30,7 +30,15 @@
   <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&amp;logo=Redis&amp;logoColor=white" alt="Redis"/>
 </p>
 
-## 시스템 구조
+### Testing (성능 테스트):
+<p align="left">
+  <img src="https://img.shields.io/badge/k6-7D64FF?style=for-the-badge&amp;logo=k6&amp;logoColor=black" alt="k6"/>
+    <img src="https://img.shields.io/badge/influxDB-22ADF6?style=for-the-badge&amp;logo=influxdb&amp;logoColor=black" alt="influxDB"/>
+    <img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&amp;logo=Grafana&amp;logoColor=black" alt="Grafana"/>
+  
+</p>
+
+## 서버 아키텍쳐
 ![cloud](https://github.com/minina0407/PortfoGram/assets/83204216/a9f425b1-8c36-46e8-b973-f76744ba9ad4)
 
 ## ERD
