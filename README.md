@@ -23,6 +23,7 @@
 <p align="left">
   <img src="https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&amp;logo=docker&amp;logoColor=white" alt="Docker"/>
   <img src="https://img.shields.io/badge/Oracle Cloud-F80000?style=for-the-badge&amp;logo=Oracle&amp;logoColor=white" alt="Oracle Cloud"/> 
+    <img src="https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&amp;logo=Jenkins&amp;logoColor=white" alt="Jenkins"/> 
 </p>
 
 ### Caching:
