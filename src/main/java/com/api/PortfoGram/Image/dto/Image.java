@@ -20,12 +20,14 @@ public class Image implements Serializable {
     private String endPoint;
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
+    private String uploadPath;
     private int deletedYn;
+    private String extension;
 
 
     @Builder
     public Image(Long imageId, String originalFileName, Long fileSize, String fileName, String endPoint,
-                 LocalDateTime createdAt, LocalDateTime deletedAt, int deletedYn) {
+                 LocalDateTime createdAt, LocalDateTime deletedAt, int deletedYn, String uploadPath,String extension){
         this.imageId = imageId;
         this.originalFileName = originalFileName;
         this.fileSize = fileSize;
@@ -34,6 +36,9 @@ public class Image implements Serializable {
         this.createdAt = createdAt;
         this.deletedAt = deletedAt;
         this.deletedYn = deletedYn;
+        this.uploadPath = uploadPath;
+        this.extension = extension;
+
     }
     public ImageEntity toImageEntity() {
         return ImageEntity.builder()
@@ -60,5 +65,13 @@ public class Image implements Serializable {
                 .endPoint(imageEntity.getEndPoint())
                 .build();
     }
-
+    public static ImageEntity toEntity(Image image){
+        return ImageEntity.builder()
+                .imageId(image.getImageId())
+                .fileName(image.fileName)
+                .originalFileName(image.originalFileName)
+                .endPoint(image.endPoint)
+                .fileSize(image.fileSize)
+                .build();
+    }
 }

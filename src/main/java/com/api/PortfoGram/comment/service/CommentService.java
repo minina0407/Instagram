@@ -54,6 +54,10 @@ public class CommentService {
 
     @Transactional
     public Comment updateComment(Long commentId, Comment comment) {
+
+        if (comment == null || comment.getContent() == null) {
+            throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID, "댓글이 입력되지 않았습니다.");
+        }
         CommentEntity commentEntity = commentRepository.findById(commentId)
                 .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "댓글을 찾을 수 없습니다."));
 

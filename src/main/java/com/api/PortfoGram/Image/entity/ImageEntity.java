@@ -43,11 +43,15 @@ public class ImageEntity {
     @Column(name = "endpoint")
     private String endPoint;
 
+    @Column(name = "upload_path")
+    private String uploadPath;
+    @Column(name = "extension",length = 45)
+    private String extension;
     @OneToOne(mappedBy = "image", fetch = FetchType.LAZY)
     private PortfolioImageEntity portfolioImage;
 
     @Builder
-    public ImageEntity(Long imageId, LocalDateTime createdAt, LocalDateTime deletedAt, int deletedYn, String originalFileName, Long fileSize, String fileName, String endPoint, PortfolioImageEntity portfolioImage) {
+    public ImageEntity(Long imageId, LocalDateTime createdAt,String uploadPath, String extension,LocalDateTime deletedAt, int deletedYn, String originalFileName, Long fileSize, String fileName, String endPoint, PortfolioImageEntity portfolioImage) {
         this.imageId = imageId;
         this.createdAt = createdAt;
         this.deletedAt = deletedAt;
@@ -57,6 +61,8 @@ public class ImageEntity {
         this.fileName = fileName;
         this.endPoint = endPoint;
         this.portfolioImage = portfolioImage;
+        this.uploadPath = uploadPath;
+        this .extension = extension;
     }
 
     public static Image fromEntity(ImageEntity image) {
@@ -69,6 +75,7 @@ public class ImageEntity {
                 .createdAt(image.getCreatedAt())
                 .deletedAt(image.getDeletedAt())
                 .deletedYn(image.getDeletedYn())
+                .uploadPath("*")
                 .build();
     }
 

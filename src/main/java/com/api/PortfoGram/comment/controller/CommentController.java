@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/comments")
@@ -33,8 +34,7 @@ public class CommentController {
     @Operation(summary = "댓글의 답변 조회", description = "특정 댓글에 대한 답변을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "답변 조회 성공"),
-            @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
-    })
+            @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없습니다.")})
     public ResponseEntity<Page<Reply>> getRepliesByCommentId(
             @PathVariable("commentId") Long commentId,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
@@ -43,12 +43,13 @@ public class CommentController {
         return new ResponseEntity<>(replies, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{commentId}")
+    @PutMapping("/{commentId}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     @Operation(summary = "댓글 수정", description = "특정 댓글을 수정합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "댓글 수정 성공"),
-            @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
+            @ApiResponse(responseCode = "200", description = "성공적으로 댓글이 수정되었습니다."),
+            @ApiResponse(responseCode = "400", description = "댓글이 입력되지 않았습니다."),
+            @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없습니다.")
     })
     public ResponseEntity<Comment> updateComment(
             @PathVariable("commentId") Long commentId,
@@ -63,7 +64,7 @@ public class CommentController {
     @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제 합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "댓글 삭제 성공"),
-            @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
+            @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없습니다.")
     })
     public ResponseEntity<Void> deleteComment(@PathVariable("commentId") Long commentId) {
         commentService.deleteComment(commentId);
