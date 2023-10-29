@@ -29,7 +29,6 @@ public class ReplyService {
     @Transactional(readOnly = true)
     public Page<Reply> getRepliesByCommentId(Long commentId, Pageable pageable) {
         CommentEntity commentEntity = commentService.getCommentById(commentId);
-
         Page<ReplyEntity> replyEntitiesPage = replyRepository.findAllByComment(commentEntity, pageable);
         return replyEntitiesPage.map(Reply::fromEntity);
 

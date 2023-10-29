@@ -1,5 +1,7 @@
 package com.api.PortfoGram.portfolio.service;
 
+import com.api.PortfoGram.exception.dto.BadRequestException;
+import com.api.PortfoGram.exception.dto.ExceptionEnum;
 import com.api.PortfoGram.portfolio.entity.PortfolioEntity;
 import com.api.PortfoGram.portfolio.entity.PortfolioLikeEntity;
 import com.api.PortfoGram.portfolio.repository.PortfolioLikeRepository;
@@ -24,6 +26,10 @@ public class PortfolioLikeService {
 
     @Transactional
     public void likePortfolio(Long portfolioId) {
+        if (portfolioId == null) {
+            throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID, "포트폴리오를 찾을 수 없습니다");
+        }
+
         UserEntity userEntity = userService.getMyUserWithAuthorities();
 
         boolean existsInDB = portfolioLikeRepository.existsByUserIdAndPortfolioId(userEntity.getId(), portfolioId);

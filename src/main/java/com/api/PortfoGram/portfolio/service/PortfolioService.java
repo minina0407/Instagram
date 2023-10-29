@@ -10,30 +10,20 @@ import com.api.PortfoGram.portfolio.dto.PortfolioImage;
 import com.api.PortfoGram.portfolio.entity.PortfolioEntity;
 import com.api.PortfoGram.portfolio.entity.PortfolioImageEntity;
 import com.api.PortfoGram.portfolio.repository.PortfolioRepository;
-import com.api.PortfoGram.user.entity.FollowEntity;
 import com.api.PortfoGram.user.entity.UserEntity;
 import com.api.PortfoGram.user.service.FollowService;
 import com.api.PortfoGram.user.service.UserService;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.Cacheable;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -49,6 +39,14 @@ public class PortfolioService {
 
     @Transactional
     public void savePortfolio(String content, List<MultipartFile> imageFiles) {
+        if (content == null || content.trim().isEmpty()) {
+            throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID, "컨텐츠 내용을 입력해주세요");
+        }
+
+        if (imageFiles == null || imageFiles.isEmpty()) {
+            throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_INVALID, "이미지가 없습니다.");
+        }
+
         UserEntity user = userService.getMyUserWithAuthorities();
         PortfolioEntity portfolioEntity = PortfolioEntity.builder()
                 .user(user)
@@ -88,6 +86,7 @@ public class PortfolioService {
     }
 
     public Page<Portfolio> getLatestPortfolios(UserEntity userEntity, Pageable pageable) {
+
         String redisKeyForCurrentUserFollowings = "user:" + userEntity.getId() + ":portfolios";
         Set<String> portfolioIds = stringRedisTemplate.opsForZSet().reverseRange(redisKeyForCurrentUserFollowings, 0, -1);
 
@@ -96,6 +95,10 @@ public class PortfolioService {
                 .collect(Collectors.toList());
 
         Page<PortfolioEntity> portfolioEntityPage = portfolioRepository.findByIdIn(followedUserIdsAsLong, pageable);
+
+        if (portfolioEntityPage.isEmpty()) {
+            throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "사용자의 포트폴리오가 없습니다.");
+        }
         Page<Portfolio> portfolio = portfolioEntityPage.map(Portfolio::fromEntity);
         return portfolio;
     }
@@ -107,7 +110,7 @@ public class PortfolioService {
 
         if (portfolio == null) {
             PortfolioEntity portfolioEntity = portfolioRepository.findPortfolioEntityById(portfolioId)
-                    .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "피드를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "포트폴리오를 찾을 수 없습니다."));
             List<PortfolioImage> portfolioImage = portfolioEntity.getPortfolioImages()
                     .stream()
                     .map(PortfolioImage::fromEntity)
@@ -128,23 +131,14 @@ public class PortfolioService {
     }
 
     @Transactional(readOnly = true)
-    public PortfolioEntity getPortfolioEntityId(Long postId) {
-        return portfolioRepository.findById(postId)
-                .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "포트폴리오를  찾을 수 없습니다."));
-
-    }
-
-    @Transactional(readOnly = true)
-    public List<Portfolio> getAllPortfolios() {
-        List<PortfolioEntity> portfolioEntities = portfolioRepository.findAll();
+    public Page<Portfolio> getAllPortfolios(Pageable pageable) {
+        Page<PortfolioEntity> portfolioEntities = portfolioRepository.findAll(pageable);
 
         if (portfolioEntities.isEmpty()) {
             throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "포트폴리오가 없습니다.");
         }
 
-        List<Portfolio> portfolios = portfolioEntities.stream()
-                .map(Portfolio::fromEntity)
-                .collect(Collectors.toList());
+        Page<Portfolio> portfolios = portfolioEntities.map(Portfolio::fromEntity);
 
         return portfolios;
     }
@@ -154,9 +148,14 @@ public class PortfolioService {
         PortfolioEntity portfolioEntity = portfolioRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND, "포트폴리오를 찾을 수 없습니다."));
 
-        portfolioEntity.updateContent(portfolioRequest.getContent()); // 게시글 내용 업데이트
+        if (portfolioRequest.getContent() != null && !portfolioRequest.getContent().isEmpty()) {
+            // 게시글 내용 업데이트만 가능하게 함
+            portfolioEntity.updateContent(portfolioRequest.getContent());
+            portfolioRepository.save(portfolioEntity);
+        }
+        if (portfolioRequest.getContent() == null && portfolioRequest.getContent().isEmpty())
+            throw new BadRequestException(ExceptionEnum.REQUEST_PARAMETER_MISSING, "컨텐츠가 없습니다.");
 
-        portfolioRepository.save(portfolioEntity);
 
     }
 

@@ -28,6 +28,10 @@ public class TokenController {
     @ApiResponse(responseCode = "200", description = "로그인 성공",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = Token.class)))
+    @ApiResponse(responseCode="400", description="잘못된 요청",
+            content=@Content)
+    @ApiResponse(responseCode="401", description="인증 실패",
+            content=@Content)
     @PostMapping("/login")
     public ResponseEntity<Token> login(@Valid @RequestBody AuthorizeUser user) {
         Token token = tokenService.login(user);
@@ -35,9 +39,15 @@ public class TokenController {
     }
 
     @Operation(summary = "토큰 재발급", description = "유효한 REFRESH 토큰을 재발급합니다.")
-    @ApiResponse(responseCode = "200", description = "토큰 재발급 성공")
-    @PostMapping("/reissue")
-    public ResponseEntity<String> reissueToken(@Valid @RequestBody Token token) {
+    @ApiResponse(responseCode="200",description="토큰 재발급 성공",
+            content=@Content(mediaType="application/json"))
+    @ApiResponse(responseCode="400",description="잘못된 요청",
+            content=@Content(mediaType="application/json"))
+    @ApiResponse(responseCode="401",description="유효하지 않은 REFRESH 토큰",
+            content=@Content(mediaType="application/json"))
+    @ApiResponse(responseCode="500",description="서버 내부 오류",
+            content=@Content(mediaType="application/json"))
+    @PostMapping("/reissue")  public ResponseEntity<String> reissueToken(@Valid @RequestBody Token token) {
         tokenService.reissueToken(token);
         return new ResponseEntity<>("토큰 정보가 갱신되었습니다.",HttpStatus.OK);
     }
