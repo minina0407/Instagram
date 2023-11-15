@@ -122,7 +122,7 @@ public class PortfolioController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping(value = "/portfolios/images/{image-id}", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/images/{image-id}", produces = MediaType.IMAGE_JPEG_VALUE)
     @Operation(summary = "포트폴리오 이미지 조회", description = "포트폴리오 이미지를 조회합니다.")
     public ResponseEntity<byte[]> getPortfolioImage(
             @PathVariable("image-id") Long Id

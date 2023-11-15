@@ -8,7 +8,8 @@ import com.api.PortfoGram.exception.dto.ExceptionEnum;
 
 import com.api.PortfoGram.Image.dto.Images;
 import com.api.PortfoGram.Image.entity.ImageEntity;
-import lombok.RequiredArgsConstructor;
+import com.api.PortfoGram.auth.utils.FileUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,13 +18,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class PortfolioImageService {
-    private final ImageRepository imageRepository;
+    @Autowired
+    private ImageRepository imageRepository;
+    @Autowired
+    private FileUtil fileUtil;
     @Value("${endpoint}")
     private String endpoint;
 
@@ -49,24 +54,41 @@ public class PortfolioImageService {
     }
 
     public Image uploadFile(MultipartFile multipartFile) throws IOException {
-        UUID uuid = UUID.randomUUID();
-        String filename = uuid + "_" + multipartFile.getOriginalFilename();
+        UUID saveName = UUID.randomUUID();
+        String extension = "." + Objects.requireNonNull(multipartFile.getContentType()).split("/")[1];
+        String finalFilePath =saveName + extension;
+
+        fileUtil.saveFile(multipartFile, saveName + extension);
 
         Image image = Image.builder()
                 .originalFileName(multipartFile.getOriginalFilename())
-                .fileName("/files/" + filename)
+                .fileName(saveName + extension)
                 .fileSize(multipartFile.getSize())
-                .endPoint(endpoint)
+                .uploadPath(finalFilePath)
+                .extension(extension)
                 .build();
 
         ImageEntity imageEntity = ImageEntity.builder()
                 .originalFileName(image.getOriginalFileName())
                 .fileSize(image.getFileSize())
                 .fileName(image.getFileName())
+                .uploadPath(image.getUploadPath())
                 .endPoint(image.getEndPoint())
                 .build();
 
         imageRepository.save(imageEntity);
+
         return image;
     }
+
+
+    public byte[] getByName(Long Id) {
+        Optional<ImageEntity> optionalImage = imageRepository.findByImageId(Id);
+
+        if (optionalImage.isEmpty())
+            throw new BadRequestException(ExceptionEnum.RESPONSE_NOT_FOUND);
+
+        return fileUtil.getFile(optionalImage.get());
+    }
+
 }
