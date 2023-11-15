@@ -24,7 +24,7 @@ public class Portfolio implements Serializable {
     @NotBlank(message = "내용이 없습니다.")
     private String content;
     private Date createdAt;
-    private List<PortfolioImage> portfolioImagess;
+    private List<PortfolioImage> portfolioImages;
     private List<Comment> comments;
     private List<Reply> replies;
 
@@ -34,7 +34,7 @@ public class Portfolio implements Serializable {
         this.userId = userId;
         this.content = content;
         this.createdAt = createdAt;
-        this.portfolioImagess = portfolioImages;
+        this.portfolioImages = portfolioImages;
         this.comments = comments;
         this.replies = replies;
     }
