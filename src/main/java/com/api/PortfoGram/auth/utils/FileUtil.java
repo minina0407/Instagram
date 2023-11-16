@@ -12,12 +12,6 @@ import java.nio.file.Files;
 
 @Component
 public class FileUtil {
-    private final String uploadPath;
-
-    public FileUtil(@Value("${upload.path}") String uploadPath) {
-        this.uploadPath = uploadPath;
-    }
-
 
     public byte[] getFile(ImageEntity imageEntity) {
         String uploadDir = "C:\\ProtfoGram\\PortfoGram\\src\\main\\resources\\static\\images\\";
