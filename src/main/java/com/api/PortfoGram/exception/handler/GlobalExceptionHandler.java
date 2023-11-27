@@ -6,6 +6,7 @@ import com.api.PortfoGram.exception.dto.ExceptionEnum;
 import com.api.PortfoGram.exception.dto.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -39,6 +40,7 @@ public class GlobalExceptionHandler  {
     public final ResponseEntity<Response> handleException(BaseException e) {
         ExceptionEnum code= e.getCode();
         logger.error("Exception Occurred", e);
+        MDC.clear();
         return new ResponseEntity<>(response(code, e.getMessage()), code.getStatus());
     }
 
@@ -54,6 +56,8 @@ public class GlobalExceptionHandler  {
     public final ResponseEntity<Response> handleOtherException(Exception e)  {
         ExceptionEnum code = ExceptionEnum.RESPONSE_INTERNAL_SEVER_ERROR;
         logger.error("Unknown Internal Exception Occurred", e);
+        MDC.clear();
+
         return new ResponseEntity<>(response(code,e.getMessage()),  code.getStatus());
     }
 
