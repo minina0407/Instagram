@@ -1,11 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="60 seconds">
-    <!-- Appender 선언 -->
+    <!-- Appender 설정 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d %p %C{1.} [%t] %m%n</pattern>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>{"traceId":"%X{traceId}","time":"%d{yyyy-MM-dd HH:mm:ss.SSS}", "service.name":"%X{serviceName}", "level":"%level", "message":"%msg"}%n</pattern>
+            </layout>
         </encoder>
     </appender>
+    <!-- DEBUG 레벨 설정 -->
     <appender name="DEBUG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>./logs/debug.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -14,15 +16,9 @@
                 <maxFileSize>10MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
-        <encoder>
-            <pattern>%d %p %C{1.} [%t] %m%n</pattern>
-        </encoder>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>DEBUG</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
+    <!-- INFO 레벨 설정 -->
     <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>./logs/info.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -31,15 +27,9 @@
                 <maxFileSize>10MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
-        <encoder>
-            <pattern>%d %p %C{1.} [%t] %m%n</pattern>
-        </encoder>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>INFO</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
+    <!-- WARN 레벨 설정 -->
     <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>./logs/warn.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -48,15 +38,9 @@
                 <maxFileSize>10MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
-        <encoder>
-            <pattern>%d %p %C{1.} [%t] %m%n</pattern>
-        </encoder>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>WARN</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
+    <!-- ERROR 레벨 설정 -->
     <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>./logs/error.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -65,21 +49,14 @@
                 <maxFileSize>10MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
-        <encoder>
-            <pattern>%d %p %C{1.} [%t] %m%n</pattern>
-        </encoder>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>ERROR</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
-    <!-- Root 로거 설정 -->
+    <!-- Root 설정 -->
     <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="DEBUG_FILE"/>
         <appender-ref ref="INFO_FILE"/>
         <appender-ref ref="WARN_FILE"/>
-        <appender-ref ref="ERROR_FILE"/>
+          <appender-ref ref="ERROR_FILE"/>
     </root>
 </configuration>
