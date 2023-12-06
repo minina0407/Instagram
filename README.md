@@ -39,8 +39,18 @@
   
 </p>
 
+### Monitoring
+<p align="left">
+  <img src="https://img.shields.io/badge/prometheus-E6522C?style=for-the-badge&amp;logo=prometheusl&amp;logoColor=black" alt="prometheus"/>
+    <img src="https://img.shields.io/badge/Loki-F46800?style=for-the-badge&amp;logo=Loki&amp;logoColor=black" alt="Loki"/>
+      <img src="https://img.shields.io/badge/Promtail-F46800?style=for-the-badge&amp;logo=Promtail&amp;logoColor=black" alt="Promtail"/>
+    <img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&amp;logo=Grafana&amp;logoColor=black" alt="Grafana"/>
+
+  
 ## 서버 아키텍쳐
 ![cloud](https://github.com/minina0407/PortfoGram/assets/83204216/a9f425b1-8c36-46e8-b973-f76744ba9ad4)
+## 모니터링 아키텍쳐
+![image](https://github.com/minina0407/PortfoGram/assets/83204216/7b084f74-5c3b-4135-ae9a-4f7fd21deff8)
 
 ## ERD
 ![Untitled (1)](https://github.com/minina0407/PortfoGram/assets/83204216/3a1b91e7-c89a-44b6-87e7-a9a80bb54145)
